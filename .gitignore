@@ -1,0 +1,15 @@
+# Node
+node_modules/
+dist/
+backend/dist/
+
+# Yarn PnP
+.pnp.*
+.yarn/
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
