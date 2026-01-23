@@ -1,0 +1,9 @@
+{
+  "name": "audiofy",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "blockchain"
+  ],
+  "packageManager": "yarn@4.12.0"
+}
