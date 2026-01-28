@@ -28,12 +28,13 @@ A API:
 - Versionamento via URL:
 ```txt
 /v1
+```
 
+Exemplo: `GET /v1/health`, `POST /v1/tracks`
 
-Exemplo: GET /v1/health, POST /v1/tracks
+### Convenção de Respostas (2026)
 
-Convenção de Respostas (2026)
-✅ Sucesso
+#### ✅ Sucesso
 
 O status HTTP indica o resultado
 
@@ -41,23 +42,22 @@ O corpo retorna apenas os dados
 
 Não confiar em mensagens de texto para lógica no frontend
 
+```json
 {
   "data": {}
 }
-
+```
 
 Exemplos:
+- `200 OK`
+- `201 Created`
+- `204 No Content`
 
-200 OK
-
-201 Created
-
-204 No Content
-
-❌ Erro
+#### ❌ Erro
 
 Formato padronizado para todos os erros:
 
+```json
 {
   "error": {
     "code": "ERROR_CODE",
@@ -65,27 +65,19 @@ Formato padronizado para todos os erros:
     "details": []
   }
 }
+```
 
-
-code → usado pelo frontend (ex: UNAUTHORIZED, VALIDATION_ERROR)
-
-message → debug / logs / UX
-
-details → opcional (ex: erros de validação por campo)
+- `code` → usado pelo frontend (ex: `UNAUTHORIZED`, `VALIDATION_ERROR`)
+- `message` → debug / logs / UX
+- `details` → opcional (ex: erros de validação por campo)
 
 Status HTTP corretos continuam sendo obrigatórios:
-
-400 validação
-
-401 não autenticado
-
-403 sem permissão
-
-404 não encontrado
-
-409 conflito
-
-500 erro inesperado
+- `400` validação
+- `401` não autenticado
+- `403` sem permissão
+- `404` não encontrado
+- `409` conflito
+- `500` erro inesperado
 
 
 
