@@ -1,15 +1,12 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
-import { HttpExceptionFilter, TransformResponseInterceptor } from "./common";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Versionamento global: todas as rotas começam com /v1
-  app.setGlobalPrefix("v1");
-
-  // Validação global de DTOs
+  // Validação global de requests
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,12 +15,12 @@ async function bootstrap() {
     }),
   );
 
-  // Interceptor para padronizar respostas de sucesso { data: ... }
-  app.useGlobalInterceptors(new TransformResponseInterceptor());
-
-  // Filter para padronizar respostas de erro { error: { code, message, details } }
+  // Tratamento global de erros
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 bootstrap();

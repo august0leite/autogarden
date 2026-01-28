@@ -1,9 +1,17 @@
 import { Module } from "@nestjs/common";
-import { HealthModule } from "./modules/health";
+import { ConfigModule } from "@nestjs/config";
+import { validate } from "./config/env.validation";
+import { PrismaModule } from "./database/prisma.module";
+import { HealthModule } from "./health/health.module";
 
 @Module({
-  imports: [HealthModule],
-  controllers: [],
-  providers: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate,
+    }),
+    PrismaModule,
+    HealthModule,
+  ],
 })
 export class AppModule {}

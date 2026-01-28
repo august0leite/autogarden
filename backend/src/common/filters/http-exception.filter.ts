@@ -4,66 +4,103 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from "@nestjs/common";
 import { Response } from "express";
-import { ErrorResponseDto } from "../dto";
+
+interface ErrorResponse {
+  error: {
+    code: string;
+    message: string;
+    details?: any[];
+  };
+}
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let code = "INTERNAL_SERVER_ERROR";
-    let message = "An unexpected error occurred";
-    let details: any[] | undefined;
+    let errorResponse: ErrorResponse;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      if (typeof exceptionResponse === "object") {
-        const responseObj = exceptionResponse as any;
+      if (typeof exceptionResponse === "object" && "message" in exceptionResponse) {
+        const message = exceptionResponse.message;
+        const messageStr = Array.isArray(message) ? message.join(", ") : String(message);
 
-        // Se já tem error.code, usa
-        if (responseObj.error?.code) {
-          code = responseObj.error.code;
-          message = responseObj.error.message || exception.message;
-          details = responseObj.error.details;
-        } else {
-          // Mapeia status HTTP para código de erro
-          code = this.getErrorCodeFromStatus(status);
-          message = responseObj.message || exception.message;
-
-          // Valida detalhes de validação
-          if (Array.isArray(responseObj.message)) {
-            details = responseObj.message;
-          }
-        }
+        errorResponse = {
+          error: {
+            code: this.getErrorCode(status, exceptionResponse),
+            message: messageStr,
+            details: Array.isArray(message) ? message : undefined,
+          },
+        };
       } else {
-        code = this.getErrorCodeFromStatus(status);
-        message = exception.message;
+        errorResponse = {
+          error: {
+            code: this.getErrorCode(status),
+            message: exception.message,
+          },
+        };
       }
-    } else if (exception instanceof Error) {
-      message = exception.message;
+    } else {
+      // Erro inesperado (500)
+      this.logger.error(
+        `Unexpected error: ${exception}`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
+
+      errorResponse = {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred",
+        },
+      };
     }
 
-    const errorResponse = new ErrorResponseDto(code, message, details);
+    // Log estruturado
+    this.logger.error({
+      statusCode: status,
+      path: request.url,
+      method: request.method,
+      error: errorResponse.error,
+    });
+
     response.status(status).json(errorResponse);
   }
 
-  private getErrorCodeFromStatus(status: number): string {
-    const statusMap: Record<number, string> = {
-      400: "BAD_REQUEST",
-      401: "UNAUTHORIZED",
-      403: "FORBIDDEN",
-      404: "NOT_FOUND",
-      409: "CONFLICT",
-      422: "VALIDATION_ERROR",
-      500: "INTERNAL_SERVER_ERROR",
-    };
+  private getErrorCode(status: number, exceptionResponse?: any): string {
+    // Se já tem um código customizado
+    if (
+      exceptionResponse &&
+      typeof exceptionResponse === "object" &&
+      "error" in exceptionResponse
+    ) {
+      return exceptionResponse.error;
+    }
 
-    return statusMap[status] || "INTERNAL_SERVER_ERROR";
+    // Códigos padrão por status
+    switch (status) {
+      case HttpStatus.BAD_REQUEST:
+        return "VALIDATION_ERROR";
+      case HttpStatus.UNAUTHORIZED:
+        return "UNAUTHORIZED";
+      case HttpStatus.FORBIDDEN:
+        return "FORBIDDEN";
+      case HttpStatus.NOT_FOUND:
+        return "NOT_FOUND";
+      case HttpStatus.CONFLICT:
+        return "CONFLICT";
+      default:
+        return "INTERNAL_SERVER_ERROR";
+    }
   }
 }
