@@ -27,10 +27,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorResponse: ErrorResponse;
+    let stack: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
+      stack = exception.stack;
 
       if (typeof exceptionResponse === "object" && "message" in exceptionResponse) {
         const message = exceptionResponse.message;
@@ -53,10 +55,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     } else {
       // Erro inesperado (500)
-      this.logger.error(
-        `Unexpected error: ${exception}`,
-        exception instanceof Error ? exception.stack : undefined,
-      );
+      stack = exception instanceof Error ? exception.stack : undefined;
 
       errorResponse = {
         error: {
@@ -66,12 +65,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       };
     }
 
-    // Log estruturado
+    // Log estruturado com stack trace
     this.logger.error({
       statusCode: status,
       path: request.url,
       method: request.method,
       error: errorResponse.error,
+      stack,
     });
 
     response.status(status).json(errorResponse);
