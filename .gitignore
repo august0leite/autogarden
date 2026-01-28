@@ -2,6 +2,7 @@
 node_modules/
 dist/
 backend/dist/
+package-lock.json
 
 # Yarn PnP
 .pnp.*
