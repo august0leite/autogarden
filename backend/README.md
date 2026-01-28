@@ -128,11 +128,16 @@ Adicionar PRISMA
 ### Setup Inicial
 
 ```bash
-# 1. Copiar .env.example para .env
-cp .env.example .env
+# 1. Criar arquivo .env na raiz do backend (caso ainda não exista)
+#    Veja a seção "Configuração Manual (sem Docker)" para um exemplo de DATABASE_URL
+touch .env
 
-# 2. Subir banco de dados PostgreSQL com Docker
-docker-compose up -d
+# 2. Garantir que você possui um PostgreSQL rodando (local ou em Docker)
+#    Não há arquivo docker-compose.yml neste projeto. Exemplo usando Docker diretamente:
+# docker run --name audiofy-postgres \
+#   -e POSTGRES_PASSWORD=postgres \
+#   -e POSTGRES_DB=audiofy \
+#   -p 5432:5432 -d postgres:16
 
 # 3. Gerar Prisma Client
 yarn prisma:generate
