@@ -4,11 +4,9 @@ import { Injectable } from '@nestjs/common';
 export class HealthService {
   getHealth() {
     return {
-      data: {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV,
-      },
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
     };
   }
 }
