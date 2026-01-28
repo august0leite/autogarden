@@ -13,3 +13,6 @@ backend/dist/
 
 # Logs
 *.log
+
+# Lock files
+package-lock.json
