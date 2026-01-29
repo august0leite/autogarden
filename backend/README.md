@@ -1,98 +1,176 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Audiofy — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend do projeto **Audiofy**, responsável por indexação de dados, regras de negócio e exposição de APIs para o frontend.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este backend segue práticas modernas (2026), com foco em:
+- previsibilidade de contratos
+- clareza de responsabilidades
+- evolução segura da API
+- mentalidade BFF (Backend for Frontend)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🧠 Decisões Arquiteturais
 
-## Project setup
+### Tipo de API
 
-```bash
-$ yarn install
+- **API Privada**
+- Com **mentalidade de BFF (Backend for Frontend)**
+
+A API:
+- não é pública
+- não precisa manter compatibilidade com terceiros
+- pode evoluir junto com o frontend
+- é otimizada para o consumo específico do FE
+
+### Versionamento da API
+
+- Versionamento via URL:
+```txt
+/v1
 ```
 
-## Compile and run the project
+Exemplo: `GET /v1/health`, `POST /v1/tracks`
 
-```bash
-# development
-$ yarn run start
+### Convenção de Respostas (2026)
 
-# watch mode
-$ yarn run start:dev
+#### ✅ Sucesso
 
-# production mode
-$ yarn run start:prod
+O status HTTP indica o resultado
+
+O corpo retorna apenas os dados
+
+Não confiar em mensagens de texto para lógica no frontend
+
+```json
+{
+  "data": {}
+}
 ```
 
-## Run tests
+Exemplos:
+- `200 OK`
+- `201 Created`
+- `204 No Content`
 
-```bash
-# unit tests
-$ yarn run test
+#### ❌ Erro
 
-# e2e tests
-$ yarn run test:e2e
+Formato padronizado para todos os erros:
 
-# test coverage
-$ yarn run test:cov
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human readable message",
+    "details": []
+  }
+}
 ```
 
-## Deployment
+- `code` → usado pelo frontend (ex: `UNAUTHORIZED`, `VALIDATION_ERROR`)
+- `message` → debug / logs / UX
+- `details` → opcional (ex: erros de validação por campo)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Status HTTP corretos continuam sendo obrigatórios:
+- `400` validação
+- `401` não autenticado
+- `403` sem permissão
+- `404` não encontrado
+- `409` conflito
+- `500` erro inesperado
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+
+
+## 📋 Roadmap de Implementação
+
+### 1. Setup Inicial
+
+- ✅ Ajustar estrutura definitiva do repositório
+- ✅ Configurar @nestjs/config
+- ✅ Definir e validar variáveis de ambiente
+- ✅ Definir NODE_ENV
+- ✅ Scripts: dev, build, start, lint
+
+### 2. Healthcheck
+
+- ✅ Criar HealthModule
+- ✅ Endpoint GET /v1/health
+- ✅ Retornar status da aplicação
+
+### 3. Tratamento Global de Erros
+
+- ✅ Criar HttpExceptionFilter
+- ✅ Padronizar todos os erros no formato definido
+- ✅ Tratar exceções inesperadas (500)
+- ✅ Log estruturado de erros
+
+### 4. Validação de Requests
+
+- ✅ Configurar ValidationPipe global
+- ✅ DTOs com class-validator
+- ✅ Retornar erros de validação no formato padrão
+
+
+5. Banco de Dados
+
+Adicionar PRISMA
+
+## 🗄️ Database (Prisma)
+
+### Setup Inicial
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# 1. Criar arquivo .env na raiz do backend (caso ainda não exista)
+#    Veja a seção "Configuração Manual (sem Docker)" para um exemplo de DATABASE_URL
+touch .env
+
+# 2. Garantir que você possui um PostgreSQL rodando (local ou em Docker)
+#    Não há arquivo docker-compose.yml neste projeto. Exemplo usando Docker diretamente:
+# docker run --name audiofy-postgres \
+#   -e POSTGRES_PASSWORD=postgres \
+#   -e POSTGRES_DB=audiofy \
+#   -p 5432:5432 -d postgres:16
+
+# 3. Gerar Prisma Client
+yarn prisma:generate
+
+# 4. Criar e aplicar migrations
+yarn prisma:migrate
+
+# 5. (Opcional) Abrir Prisma Studio
+yarn prisma:studio
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Configuração Manual (sem Docker)
 
-## Resources
+Se preferir instalar PostgreSQL manualmente:
 
-Check out a few resources that may come in handy when working with NestJS:
+1. Instale PostgreSQL na sua máquina
+2. Crie um banco de dados chamado `audiofy`
+3. Atualize `DATABASE_URL` no `.env` com suas credenciais
+4. Execute `yarn prisma:generate` e `yarn prisma:migrate`
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Scripts do Prisma
 
-## Support
+- `yarn prisma:generate` - Gera o Prisma Client
+- `yarn prisma:migrate` - Cria e aplica migrations
+- `yarn prisma:studio` - Abre interface visual do banco
+- `yarn prisma:seed` - Executa seed do banco
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Uso no Código
 
-## Stay in touch
+```typescript
+import { PrismaService } from './database/prisma.service';
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+@Injectable()
+export class MyService {
+  constructor(private prisma: PrismaService) {}
 
-## License
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
+}
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+O `PrismaService` está disponível globalmente (módulo marcado como `@Global()`), então você pode injetá-lo em qualquer service sem precisar importar o `PrismaModule`.
+
