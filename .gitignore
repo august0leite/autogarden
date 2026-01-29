@@ -14,3 +14,6 @@ package-lock.json
 
 # Logs
 *.log
+
+# Lock files
+package-lock.json
