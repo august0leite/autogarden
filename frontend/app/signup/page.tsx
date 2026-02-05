@@ -1,3 +1,4 @@
+import { Navbar } from "@/components/navbar";
 import { SignUpCard } from "@/components/signup-card";
 
 export const metadata = {
@@ -6,5 +7,10 @@ export const metadata = {
 };
 
 export default function SignUpPage() {
-  return <SignUpCard />;
+  return (
+    <>
+      <Navbar />
+      <SignUpCard />
+    </>
+  );
 }
