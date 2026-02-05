@@ -7,14 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Exemplo de modelo - ajustar conforme necessidade do projeto
+// Representa quem está usando a plataforma
+// User é a entidade principal - pode ter credenciais Web2 E/OU Web3
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid())
+  
+  // Web2 auth (email + senha)
+  email         String?   @unique
+  passwordHash  String?
+  name          String?
+  
+  // Web3 auth (wallet)
+  walletAddress String?   @unique
+  
+  createdAt     DateTime  @default(now())
+  lastLoginAt   DateTime?
+  
+  // Relação com tracks criados
+  tracks        Track[]
 
   @@map("users")
+}
+
+// Representa obras musicais (espelho do contrato on-chain)
+model Track {
+  id           String      @id @default(uuid())
+  workId       BigInt      @unique // workId on-chain
+  
+  // Criador on-chain (sempre wallet - reflete o contrato)
+  creatorWallet String
+  
+  // Referência ao User da plataforma
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title         String
+  metadataHash  String
+  state         TrackState  @default(Draft)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("tracks")
+  @@index([userId])
+  @@index([creatorWallet])
+  @@index([state])
+}
+
+enum TrackState {
+  Draft
+  Registered
+  Disputed
+  Finalized
+}
+
+// Estado do indexador - persiste último bloco processado
+model IndexerState {
+  id                  String   @id @default("singleton") // Apenas 1 registro
+  lastBlockProcessed  BigInt   @default(0)
+  updatedAt           DateTime @updatedAt
+  
+  @@map("indexer_state")
 }

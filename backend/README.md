@@ -156,43 +156,105 @@ api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
 ## 🚀 Próximos Passos
 
-1. **Criar migration do banco de dados:**
+### Setup Inicial
+
+1. **Configure as variáveis de ambiente:**
    ```bash
-   npx prisma migrate dev --name add_users_table
+   cp .env.example .env
+   # Edite .env com suas credenciais
    ```
 
-2. **Gerar Prisma Client:**
+2. **Instale as dependências:**
+   ```bash
+   yarn install
+   ```
+
+3. **Criar migration do banco de dados:**
+   ```bash
+   yarn prisma:migrate
+   ```
+
+4. **Gerar Prisma Client:**
    ```bash
    npx prisma generate
    ```
 
-3. **Testar a aplicação:**
+5. **Inicie a aplicação:**
    ```bash
-   yarn dev
+   yarn start:dev
    ```
 
-4. **Testar endpoints de autenticação:**
-   ```bash
-   # Registro
-   curl -X POST http://localhost:3000/v1/auth/register \
-     -H "Content-Type: application/json" \
-     -d '{"name":"Test User","email":"test@example.com","password":"123456"}'
+### Testar Endpoints
 
-   # Login
-   curl -X POST http://localhost:3000/v1/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"email":"test@example.com","password":"123456"}'
+```bash
+# Health (pública)
+curl http://localhost:3000/v1/health
 
-   # Health (pública)
-   curl http://localhost:3000/v1/health
+# Registro
+curl -X POST http://localhost:3000/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"123456"}'
 
-   # Rota protegida (exemplo futuro)
-   curl http://localhost:3000/v1/protected \
-     -H "Authorization: Bearer <seu-token>"
-   ```
+# Login
+curl -X POST http://localhost:3000/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"123456"}'
 
-### ⚠️ Importante
+# Estado do indexador (requer auth)
+curl http://localhost:3000/v1/indexer/state \
+  -H "Authorization: Bearer <seu-token>"
+```
+
+---
+
+## 🔄 Indexador Blockchain
+
+O backend possui um **indexador automático** que sincroniza eventos da blockchain:
+
+### Como funciona
+
+1. **Cron job** roda a cada 30 segundos
+2. Lê `lastBlockProcessed` do banco
+3. Busca eventos novos via Alchemy (ethers v6)
+4. Processa eventos de forma **idempotente**
+5. Atualiza `lastBlockProcessed`
+
+### Princípios
+
+✅ **Determinístico** - mesmos blocos = mesmos eventos  
+✅ **Reexecutável** - pode crashar e continuar  
+✅ **Sem estado escondido** - tudo no banco  
+✅ **Idempotente** - não duplica tracks  
+✅ **Tolerante a falhas** - reprocessa blocos em caso de erro
+
+### Configuração
+
+No `.env`:
+```env
+ALCHEMY_API_KEY=your-alchemy-api-key
+CONTRACT_ADDRESS=0x...
+CHAIN_ID=11155111  # sepolia
+```
+
+### Endpoints
+
+- `GET /v1/indexer/state` - Ver último bloco processado
+- `POST /v1/indexer/sync` - Forçar sincronização manual
+
+### Fluxo
+
+```
+Blockchain → Indexador → Banco de Dados → API → Frontend
+```
+
+O **frontend nunca chama RPC** - tudo vem da API.
+
+---
+
+## ⚠️ Importante
 
 - Configure `JWT_SECRET` no arquivo `.env` com um valor seguro
+- Configure `ALCHEMY_API_KEY` com sua chave da Alchemy
+- Configure `CONTRACT_ADDRESS` com o endereço do contrato deployado
 - Nunca commite o arquivo `.env` (já deve estar no .gitignore)
 - Em produção, use variáveis de ambiente do ambiente de deploy
