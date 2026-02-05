@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight, Eye } from "lucide-react";
 import { Button } from "./button";
 
@@ -19,14 +20,15 @@ export function FinalCtaSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button 
-            variant="primary" 
-            size="lg"
-            onClick={() => {}}
-          >
-            Get Started
-            <ArrowRight className="w-5 h-5" />
-          </Button>
+          <Link href="/signup">
+            <Button 
+              variant="primary" 
+              size="lg"
+            >
+              Get Started
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </Link>
           <Button 
             variant="secondary" 
             size="lg"

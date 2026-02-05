@@ -33,12 +33,16 @@ export function Navbar() {
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-4">
-            <Button variant="secondary" className="hidden sm:inline-flex">
-              Sign In
-            </Button>
-            <Button variant="primary">
-              Get started
-            </Button>
+            <Link href="/signin">
+              <Button variant="secondary">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/signup" >
+              <Button variant="primary" className="hidden sm:inline-flex">
+                Get started
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
