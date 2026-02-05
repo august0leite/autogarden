@@ -41,3 +41,7 @@ lerna-debug.log*
 
 # Prisma
 prisma/migrations
+
+
+#
+API_ENDPOINTS.md

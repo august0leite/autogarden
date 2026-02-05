@@ -110,67 +110,151 @@ Status HTTP corretos continuam sendo obrigatórios:
 - ✅ DTOs com class-validator
 - ✅ Retornar erros de validação no formato padrão
 
+### 5. Banco de Dados
 
-5. Banco de Dados
+- ✅ Adicionar PRISMA
+- ✅ Adicionar postgres
 
-Adicionar PRISMA
+### 6. Autenticação JWT
 
-## 🗄️ Database (Prisma)
+- ✅ Implementar AuthModule com JWT
+- ✅ Criar endpoints de login e registro
+- ✅ Implementar JwtAuthGuard
+- ✅ Decorator @Public() para rotas públicas
+- ✅ Configurar guard global
+- ✅ Criar UsersModule com Prisma
+- ✅ Separar rotas públicas das privadas
+
+## 🔐 Autenticação
+
+### Rotas Públicas
+
+- `POST /v1/auth/register`
+- `POST /v1/auth/login`
+- `GET /v1/health`
+
+### Rotas Privadas
+
+Todas as outras rotas requerem token JWT no header:
+
+```
+Authorization: Bearer <token>
+```
+
+### Uso no Frontend
+
+```typescript
+// Login
+const { data } = await api.post('/v1/auth/login', { email, password });
+const { access_token, user } = data;
+
+// Requisições autenticadas
+api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+```
+
+---
+
+## 🚀 Próximos Passos
 
 ### Setup Inicial
 
+1. **Configure as variáveis de ambiente:**
+   ```bash
+   cp .env.example .env
+   # Edite .env com suas credenciais
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   yarn install
+   ```
+
+3. **Criar migration do banco de dados:**
+   ```bash
+   yarn prisma:migrate
+   ```
+
+4. **Gerar Prisma Client:**
+   ```bash
+   npx prisma generate
+   ```
+
+5. **Inicie a aplicação:**
+   ```bash
+   yarn start:dev
+   ```
+
+### Testar Endpoints
+
 ```bash
-# 1. Criar arquivo .env na raiz do backend (caso ainda não exista)
-#    Veja a seção "Configuração Manual (sem Docker)" para um exemplo de DATABASE_URL
-touch .env
+# Health (pública)
+curl http://localhost:3000/v1/health
 
-# 2. Garantir que você possui um PostgreSQL rodando (local ou em Docker)
-#    Não há arquivo docker-compose.yml neste projeto. Exemplo usando Docker diretamente:
-# docker run --name audiofy-postgres \
-#   -e POSTGRES_PASSWORD=postgres \
-#   -e POSTGRES_DB=audiofy \
-#   -p 5432:5432 -d postgres:16
+# Registro
+curl -X POST http://localhost:3000/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"123456"}'
 
-# 3. Gerar Prisma Client
-yarn prisma:generate
+# Login
+curl -X POST http://localhost:3000/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"123456"}'
 
-# 4. Criar e aplicar migrations
-yarn prisma:migrate
-
-# 5. (Opcional) Abrir Prisma Studio
-yarn prisma:studio
+# Estado do indexador (requer auth)
+curl http://localhost:3000/v1/indexer/state \
+  -H "Authorization: Bearer <seu-token>"
 ```
 
-### Configuração Manual (sem Docker)
+---
 
-Se preferir instalar PostgreSQL manualmente:
+## 🔄 Indexador Blockchain
 
-1. Instale PostgreSQL na sua máquina
-2. Crie um banco de dados chamado `audiofy`
-3. Atualize `DATABASE_URL` no `.env` com suas credenciais
-4. Execute `yarn prisma:generate` e `yarn prisma:migrate`
+O backend possui um **indexador automático** que sincroniza eventos da blockchain:
 
-### Scripts do Prisma
+### Como funciona
 
-- `yarn prisma:generate` - Gera o Prisma Client
-- `yarn prisma:migrate` - Cria e aplica migrations
-- `yarn prisma:studio` - Abre interface visual do banco
-- `yarn prisma:seed` - Executa seed do banco
+1. **Cron job** roda a cada 30 segundos
+2. Lê `lastBlockProcessed` do banco
+3. Busca eventos novos via Alchemy (ethers v6)
+4. Processa eventos de forma **idempotente**
+5. Atualiza `lastBlockProcessed`
 
-### Uso no Código
+### Princípios
 
-```typescript
-import { PrismaService } from './database/prisma.service';
+✅ **Determinístico** - mesmos blocos = mesmos eventos  
+✅ **Reexecutável** - pode crashar e continuar  
+✅ **Sem estado escondido** - tudo no banco  
+✅ **Idempotente** - não duplica tracks  
+✅ **Tolerante a falhas** - reprocessa blocos em caso de erro
 
-@Injectable()
-export class MyService {
-  constructor(private prisma: PrismaService) {}
+### Configuração
 
-  async findAll() {
-    return this.prisma.user.findMany();
-  }
-}
+No `.env`:
+```env
+ALCHEMY_API_KEY=your-alchemy-api-key
+CONTRACT_ADDRESS=0x...
+CHAIN_ID=11155111  # sepolia
 ```
 
-O `PrismaService` está disponível globalmente (módulo marcado como `@Global()`), então você pode injetá-lo em qualquer service sem precisar importar o `PrismaModule`.
+### Endpoints
 
+- `GET /v1/indexer/state` - Ver último bloco processado
+- `POST /v1/indexer/sync` - Forçar sincronização manual
+
+### Fluxo
+
+```
+Blockchain → Indexador → Banco de Dados → API → Frontend
+```
+
+O **frontend nunca chama RPC** - tudo vem da API.
+
+---
+
+## ⚠️ Importante
+
+- Configure `JWT_SECRET` no arquivo `.env` com um valor seguro
+- Configure `ALCHEMY_API_KEY` com sua chave da Alchemy
+- Configure `CONTRACT_ADDRESS` com o endereço do contrato deployado
+- Nunca commite o arquivo `.env` (já deve estar no .gitignore)
+- Em produção, use variáveis de ambiente do ambiente de deploy
