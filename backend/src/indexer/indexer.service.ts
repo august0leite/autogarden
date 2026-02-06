@@ -149,7 +149,8 @@ export class IndexerService {
       // Limita range para evitar timeouts
       // Alchemy free tier: max 10 blocos por request
       // Alchemy PAYG: pode usar ranges maiores (10000+)
-      const blockRange = this.configService.get<number>('INDEXER_BLOCK_RANGE') || 10;
+      const configuredBlockRange = this.configService.get<string>('INDEXER_BLOCK_RANGE');
+      const blockRange = configuredBlockRange ? Number(configuredBlockRange) : 10;
       // Subtrai 1 porque o range é inclusivo em ambos os lados: [from, to]
       const toBlockNum = Math.min(fromBlockNum + blockRange - 1, latestBlock);
 
