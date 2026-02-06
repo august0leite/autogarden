@@ -7,8 +7,6 @@ import { Button } from "./button";
 import { AuthLayout } from "./auth-layout";
 import { motion } from "motion/react";
 
-type InputState = "default" | "focus" | "error" | "success";
-
 export function SignInCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -41,7 +39,7 @@ export function SignInCard() {
 
   return (
     <AuthLayout>
-      <div className="bg-indigo/50 backdrop-blur border border-border rounded-2xl p-6 shadow-2xl">
+      <div className="relative bg-indigo/50 backdrop-blur border border-border rounded-2xl p-6 shadow-2xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -219,14 +217,12 @@ export function SignInCard() {
             </button>
           </div>
           <div className="text-center text-sm text-gray">
-            Don't have an account?{" "}
-            <Link href="/signup">
-              <button
-                type="button"
-                className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
-              >
-                Create one
-              </button>
+            Don&#39;t have an account?{" "}
+            <Link 
+              href="/signup"
+              className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
+            >
+              Create one
             </Link>
           </div>
         </motion.div>

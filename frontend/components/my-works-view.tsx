@@ -186,13 +186,22 @@ export function MyWorksView({ onCreateWork }: MyWorksViewProps) {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors">
+                <button 
+                  className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors"
+                  aria-label="View work details"
+                >
                   <Eye className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors">
+                <button 
+                  className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors"
+                  aria-label="Edit work"
+                >
                   <Edit className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors">
+                <button 
+                  className="p-2 rounded-lg text-gray hover:bg-indigo hover:text-white transition-colors"
+                  aria-label="More options"
+                >
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </div>

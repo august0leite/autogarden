@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "./button";
 import { motion } from "motion/react";
+import { buttonVariants } from "./button";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -39,15 +39,11 @@ export function Navbar() {
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-4">
-            <Link href="/signin">
-              <Button variant="secondary">
-                Sign In
-              </Button>
+            <Link href="/signin" className={buttonVariants({ variant: "secondary" })}>
+              Sign In
             </Link>
-            <Link href="/signup" >
-              <Button variant="primary" className="hidden sm:inline-flex">
-                Get started
-              </Button>
+            <Link href="/signup" className={buttonVariants({ variant: "primary", className: "hidden sm:inline-flex" })}>
+              Get started
             </Link>
           </div>
         </div>

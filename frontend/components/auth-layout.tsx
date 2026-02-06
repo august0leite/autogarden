@@ -10,13 +10,16 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         {/* Abstract background elements */}
         <div className="absolute inset-0">
           {/* Grid pattern - very subtle */}
-          <div style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px'
-          }} />
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)
+              `,
+              backgroundSize: '80px 80px'
+            }} 
+          />
           
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-violet/10 via-transparent to-transparent" />

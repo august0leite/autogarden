@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Wallet, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Wallet } from "lucide-react";
 import { Button } from "./button";
 import { AuthLayout } from "./auth-layout";
 import { motion } from "motion/react";
@@ -50,7 +50,7 @@ export function SignUpCard() {
 
   return (
     <AuthLayout>
-      <div className="bg-indigo/50 backdrop-blur border border-border rounded-2xl p-6 shadow-2xl">
+      <div className="relative bg-indigo/50 backdrop-blur border border-border rounded-2xl p-6 shadow-2xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -256,13 +256,11 @@ export function SignUpCard() {
           className="mt-6 pt-6 border-t border-border/50 text-center text-sm text-gray"
         >
           Already have an account?{" "}
-          <Link href="/signin">
-            <button
-              type="button"
-              className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
-            >
-              Sign in
-            </button>
+          <Link 
+            href="/signin"
+            className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
+          >
+            Sign in
           </Link>
         </motion.div>
 

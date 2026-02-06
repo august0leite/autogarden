@@ -9,7 +9,6 @@ import {
   LogOut, 
   Menu, 
   X,
-  Home
 } from "lucide-react";
 import { motion } from "motion/react";
 
