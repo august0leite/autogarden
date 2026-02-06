@@ -31,7 +31,19 @@ export class IndexerService {
     // Inicializa provider Alchemy
     const alchemyApiKey = this.configService.get<string>('ALCHEMY_API_KEY');
     const chainId = this.configService.get<string>('CHAIN_ID');
-    this.contractAddress = this.configService.get<string>('CONTRACT_ADDRESS');
+    const contractAddress = this.configService.get<string>('CONTRACT_ADDRESS');
+
+    if (!alchemyApiKey) {
+      throw new Error('ALCHEMY_API_KEY is not defined in environment variables');
+    }
+    if (!chainId) {
+      throw new Error('CHAIN_ID is not defined in environment variables');
+    }
+    if (!contractAddress) {
+      throw new Error('CONTRACT_ADDRESS is not defined in environment variables');
+    }
+
+    this.contractAddress = contractAddress;
 
     // Determina network baseado no chainId
     const network = this.getNetworkFromChainId(chainId);
@@ -134,9 +146,13 @@ export class IndexerService {
         return [];
       }
 
-      // Limita range para evitar timeouts (max 10000 blocos por vez)
-      // Alchemy tem limites de range por request
-      const toBlockNum = Math.min(fromBlockNum + 10000, latestBlock);
+      // Limita range para evitar timeouts
+      // Alchemy free tier: max 10 blocos por request
+      // Alchemy PAYG: pode usar ranges maiores (10000+)
+      const configuredBlockRange = this.configService.get<string>('INDEXER_BLOCK_RANGE');
+      const blockRange = configuredBlockRange ? Number(configuredBlockRange) : 10;
+      // Subtrai 1 porque o range é inclusivo em ambos os lados: [from, to]
+      const toBlockNum = Math.min(fromBlockNum + blockRange - 1, latestBlock);
 
       this.logger.debug(
         `Buscando eventos: blocos ${fromBlockNum} → ${toBlockNum} (latest: ${latestBlock})`,
