@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "./button";
 import { motion } from "motion/react";
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
+
   return (
     <motion.nav 
       initial={{ y: -20, opacity: 0 }}
@@ -18,18 +22,20 @@ export function Navbar() {
             Audiofy
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
-              How it works
-            </Link>
-            <Link href="#why-on-chain" className="text-gray-300 hover:text-white transition-colors">
-              Why On-Chain
-            </Link>
-            <Link href="#who-is-it-for" className="text-gray-300 hover:text-white transition-colors">
-              For Artists
-            </Link>
-          </div>
+          {/* Navigation Links - Only visible on landing page */}
+          {isLandingPage && (
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
+                How it works
+              </Link>
+              <Link href="#why-on-chain" className="text-gray-300 hover:text-white transition-colors">
+                Why On-Chain
+              </Link>
+              <Link href="#who-is-it-for" className="text-gray-300 hover:text-white transition-colors">
+                For Artists
+              </Link>
+            </div>
+          )}
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-4">
