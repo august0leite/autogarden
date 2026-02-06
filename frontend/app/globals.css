@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  /* Audiofy Color Palette */
+  --color-midnight: #0F1117;
+  --color-indigo: #1C1E2D;
+  --color-violet: #6B5CFF;
+  --color-white: #FFFFFF;
+  --color-gray: #9CA3AF;
+  --color-border: rgba(255, 255, 255, 0.08);
+}
+
+@theme {
+  /* Colors */
+  --color-midnight: var(--color-midnight);
+  --color-indigo: var(--color-indigo);
+  --color-violet: var(--color-violet);
+  --color-white: var(--color-white);
+  --color-gray: var(--color-gray);
+  --color-border: var(--color-border);
+  
+  /* Font families */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-midnight);
+  color: var(--color-white);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
