@@ -8,63 +8,167 @@ datasource db {
 }
 
 // Representa quem está usando a plataforma
-// User é a entidade principal - pode ter credenciais Web2 E/OU Web3
 model User {
   id            String    @id @default(uuid())
   
-  // Web2 auth (email + senha)
-  email         String?   @unique
-  passwordHash  String?
+  // Autenticação (email + senha)
+  email         String    @unique
+  passwordHash  String
   name          String?
-  
-  // Web3 auth (wallet)
-  walletAddress String?   @unique
   
   createdAt     DateTime  @default(now())
   lastLoginAt   DateTime?
   
-  // Relação com tracks criados
-  tracks        Track[]
+  // Relação com cultivos
+  cultivations  Cultivation[]
 
   @@map("users")
 }
 
-// Representa obras musicais (espelho do contrato on-chain)
-model Track {
-  id           String      @id @default(uuid())
-  workId       BigInt      @unique // workId on-chain
-  
-  // Criador on-chain (sempre wallet - reflete o contrato)
-  creatorWallet String
-  
-  // Referência ao User da plataforma
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  title         String
-  metadataHash  String
-  state         TrackState  @default(Draft)
+// Dispositivo físico (Arduino) associado a um cultivo
+model Device {
+  id            String      @id @default(uuid())
+  token         String      @unique // Token de autenticação do dispositivo
+  name          String
+  description   String?
+  status        DeviceStatus @default(OFFLINE)
+  lastPingAt    DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
-  @@map("tracks")
-  @@index([userId])
-  @@index([creatorWallet])
-  @@index([state])
-}
-
-enum TrackState {
-  Draft
-  Registered
-  Disputed
-  Finalized
-}
-
-// Estado do indexador - persiste último bloco processado
-model IndexerState {
-  id                  String   @id @default("singleton") // Apenas 1 registro
-  lastBlockProcessed  BigInt   @default(0)
-  updatedAt           DateTime @updatedAt
   
-  @@map("indexer_state")
+  // Relação com cultivo
+  cultivationId String      @unique
+  cultivation   Cultivation @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  
+  // Históricos
+  readings      Reading[]
+  actions       Action[]
+  decisions     Decision[]
+
+  @@map("devices")
+  @@index([status])
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  ERROR
+}
+
+// Cultivo - configuração de parâmetros de crescimento
+model Cultivation {
+  id                  String    @id @default(uuid())
+  name                String
+  plantType           String?
+  
+  // Parâmetros configuráveis
+  soilMoistureMin     Float     @default(40)
+  soilMoistureMax     Float     @default(70)
+  temperatureMin      Float     @default(15)
+  temperatureMax      Float     @default(35)
+  lightMin            Float     @default(30)
+  lightMax            Float     @default(100)
+  cooldownMinutes     Int       @default(30) // Tempo mínimo entre irrigações
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  // Relação com usuário
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relação com dispositivo (1:1)
+  device              Device?
+
+  @@map("cultivations")
+  @@index([userId])
+}
+
+// Leitura dos sensores do dispositivo
+model Reading {
+  id            String    @id @default(uuid())
+  soilMoisture  Float
+  temperature   Float
+  light         Float
+  timestamp     DateTime  @default(now())
+  
+  // Relação com dispositivo
+  deviceId      String
+  device        Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  // Decisão tomada a partir desta leitura
+  decision      Decision?
+
+  @@map("readings")
+  @@index([deviceId, timestamp])
+}
+
+// Decisão tomada pelo motor automático
+model Decision {
+  id            String         @id @default(uuid())
+  decision      DecisionType
+  reason        String
+  timestamp     DateTime       @default(now())
+  
+  // Leitura que originou a decisão
+  readingId     String         @unique
+  reading       Reading        @relation(fields: [readingId], references: [id], onDelete: Cascade)
+  
+  // Dispositivo
+  deviceId      String
+  device        Device         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  // Ação gerada (se aplicável)
+  action        Action?
+
+  @@map("decisions")
+  @@index([deviceId, timestamp])
+}
+
+enum DecisionType {
+  NO_ACTION        // Tudo dentro dos parâmetros
+  IRRIGATE         // Necessita irrigação
+  ALERT_TEMP_HIGH  // Temperatura alta
+  ALERT_TEMP_LOW   // Temperatura baixa
+  ALERT_LIGHT_LOW  // Luz baixa
+}
+
+// Ação executada (manual ou automática)
+model Action {
+  id              String       @id @default(uuid())
+  type            ActionType
+  durationSeconds Int?         // Duração da ação (ex: tempo de irrigação)
+  origin          ActionOrigin @default(AUTO)
+  status          ActionStatus @default(PENDING)
+  timestamp       DateTime     @default(now())
+  executedAt      DateTime?
+  
+  // Dispositivo
+  deviceId        String
+  device          Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  // Decisão que originou (se automática)
+  decisionId      String?      @unique
+  decision        Decision?    @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+
+  @@map("actions")
+  @@index([deviceId, timestamp])
+  @@index([status])
+}
+
+enum ActionType {
+  IRRIGATION
+  VENTILATION
+  LIGHTING
+}
+
+enum ActionOrigin {
+  AUTO
+  MANUAL
+}
+
+enum ActionStatus {
+  PENDING
+  EXECUTED
+  FAILED
 }

@@ -2,10 +2,9 @@ import { Injectable, ConflictException, NotFoundException, BadRequestException }
 import { PrismaService } from '../database/prisma.service';
 
 interface CreateUserData {
-  email?: string;
-  passwordHash?: string;
+  email: string;
+  passwordHash: string;
   name?: string;
-  walletAddress?: string;
 }
 
 @Injectable()
@@ -13,9 +12,9 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUserData) {
-    // Validar que pelo menos uma credencial foi fornecida
-    if (!data.email && !data.walletAddress) {
-      throw new BadRequestException('EMAIL_OR_WALLET_REQUIRED');
+    // Validar que email foi fornecido
+    if (!data.email) {
+      throw new BadRequestException('EMAIL_REQUIRED');
     }
 
     // Se forneceu email, precisa de senha
@@ -24,30 +23,19 @@ export class UsersService {
     }
 
     // Verificar se email já existe
-    if (data.email) {
-      const existingUserByEmail = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
+    const existingUserByEmail = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
 
-      if (existingUserByEmail) {
-        throw new ConflictException('EMAIL_ALREADY_EXISTS');
-      }
-    }
-
-    // Verificar se wallet já existe
-    if (data.walletAddress) {
-      const existingUserByWallet = await this.prisma.user.findUnique({
-        where: { walletAddress: data.walletAddress },
-      });
-
-      if (existingUserByWallet) {
-        throw new ConflictException('WALLET_ALREADY_EXISTS');
-      }
+    if (existingUserByEmail) {
+      throw new ConflictException('EMAIL_ALREADY_EXISTS');
     }
 
     return this.prisma.user.create({ 
       data: {
-        ...data,
+        email: data.email,
+        passwordHash: data.passwordHash,
+        name: data.name,
         lastLoginAt: new Date(),
       },
     });
@@ -55,10 +43,6 @@ export class UsersService {
 
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({ where: { email } });
-  }
-
-  async findByWalletAddress(walletAddress: string) {
-    return this.prisma.user.findUnique({ where: { walletAddress } });
   }
 
   async findById(id: string) {
@@ -72,7 +56,6 @@ export class UsersService {
       id: user.id,
       email: user.email ?? undefined,
       name: user.name ?? undefined,
-      walletAddress: user.walletAddress ?? undefined,
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt ?? undefined,
     };
@@ -85,20 +68,8 @@ export class UsersService {
     });
   }
 
-  /**
-   * Busca ou cria usuário via wallet (Web3 auth)
-   * Usado no fluxo de autenticação com carteira
-   */
-  async findOrCreateByWallet(walletAddress: string) {
-    let user = await this.findByWalletAddress(walletAddress);
-    
-    if (!user) {
-      user = await this.create({ walletAddress });
-    } else {
-      user = await this.updateLastLogin(user.id);
-    }
-
-    return user;
+  async findByWalletAddress(walletAddress: string) {
+    return this.prisma.user.findUnique({ where: { walletAddress } });
   }
 
   /**
