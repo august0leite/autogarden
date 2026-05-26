@@ -6,7 +6,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('devices')
 @ApiBearerAuth()
-@Controller('devices')
+@Controller('v1/devices')
 export class DevicesController {
   constructor(private readonly devicesService: DevicesService) {}
 
