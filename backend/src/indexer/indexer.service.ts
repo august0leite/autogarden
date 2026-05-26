@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ethers } from 'ethers';
 import { PrismaService } from '../database/prisma.service';
-import { TracksService } from '../tracks/tracks.service';
 import { MUSIC_CONTRACT_ABI } from './contract.abi';
 
 interface BlockchainEvent {
@@ -25,7 +24,6 @@ export class IndexerService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly tracksService: TracksService,
     private readonly configService: ConfigService,
   ) {
     // Inicializa provider Alchemy
