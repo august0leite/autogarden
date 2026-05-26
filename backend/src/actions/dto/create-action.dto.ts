@@ -1,10 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 
+export enum ActionType {
+  IRRIGATION = 'irrigation',
+  VENTILATION = 'ventilation',
+  LIGHTING = 'lighting',
+}
+
 export class CreateActionDto {
-  @ApiProperty({ enum: ['irrigation', 'ventilation', 'lighting'] })
-  @IsEnum(['irrigation', 'ventilation', 'lighting'])
-  type: 'irrigation' | 'ventilation' | 'lighting';
+  @ApiProperty({ enum: ActionType })
+  @IsEnum(ActionType)
+  type: ActionType;
 
   @ApiProperty({ required: false })
   @IsOptional()
