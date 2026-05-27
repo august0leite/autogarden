@@ -1,17 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { PrismaService } from '../database/prisma.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import {
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { PrismaService } from "../database/prisma.service";
 
-describe('UsersService', () => {
+describe("UsersService", () => {
   let service: UsersService;
   let prismaService: jest.Mocked<PrismaService>;
 
   const mockUser = {
-    id: '123',
-    email: 'test@example.com',
-    passwordHash: 'hashedpassword',
-    name: 'Test User',
+    id: "123",
+    email: "test@example.com",
+    passwordHash: "hashedpassword",
+    name: "Test User",
     walletAddress: null,
     createdAt: new Date(),
     lastLoginAt: new Date(),
@@ -40,16 +44,16 @@ describe('UsersService', () => {
     prismaService = module.get(PrismaService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
-    it('should successfully create a user with email and password', async () => {
+  describe("create", () => {
+    it("should successfully create a user with email and password", async () => {
       const createData = {
-        email: 'test@example.com',
-        passwordHash: 'hashedpassword',
-        name: 'Test User',
+        email: "test@example.com",
+        passwordHash: "hashedpassword",
+        name: "Test User",
       };
 
       prismaService.user.findUnique.mockResolvedValue(null);
@@ -70,126 +74,134 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('should throw BadRequestException if email is not provided', async () => {
+    it("should throw BadRequestException if email is not provided", async () => {
       const createData = {
-        email: '',
-        passwordHash: 'hashedpassword',
+        email: "",
+        passwordHash: "hashedpassword",
       };
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
-    it('should throw BadRequestException if email is provided but password is not', async () => {
+    it("should throw BadRequestException if email is provided but password is not", async () => {
       const createData = {
-        email: 'test@example.com',
-        passwordHash: '',
+        email: "test@example.com",
+        passwordHash: "",
       };
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
-    it('should throw ConflictException if email already exists', async () => {
+    it("should throw ConflictException if email already exists", async () => {
       const createData = {
-        email: 'test@example.com',
-        passwordHash: 'hashedpassword',
+        email: "test@example.com",
+        passwordHash: "hashedpassword",
       };
 
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
-      await expect(service.create(createData)).rejects.toThrow(ConflictException);
+      await expect(service.create(createData)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
-  describe('findByEmail', () => {
-    it('should return user when found', async () => {
+  describe("findByEmail", () => {
+    it("should return user when found", async () => {
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await service.findByEmail('test@example.com');
+      const result = await service.findByEmail("test@example.com");
 
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@example.com' },
+        where: { email: "test@example.com" },
       });
       expect(result).toEqual(mockUser);
     });
 
-    it('should return null when user not found', async () => {
+    it("should return null when user not found", async () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      const result = await service.findByEmail('notfound@example.com');
+      const result = await service.findByEmail("notfound@example.com");
 
       expect(result).toBeNull();
     });
   });
 
-  describe('findById', () => {
-    it('should return user data when found', async () => {
+  describe("findById", () => {
+    it("should return user data when found", async () => {
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await service.findById('123');
+      const result = await service.findById("123");
 
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { id: '123' },
+        where: { id: "123" },
       });
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('email');
+      expect(result).toHaveProperty("id");
+      expect(result).toHaveProperty("email");
     });
 
-    it('should throw NotFoundException when user not found', async () => {
+    it("should throw NotFoundException when user not found", async () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.findById('999')).rejects.toThrow(NotFoundException);
+      await expect(service.findById("999")).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('updateLastLogin', () => {
-    it('should update user last login timestamp', async () => {
+  describe("updateLastLogin", () => {
+    it("should update user last login timestamp", async () => {
       const updatedUser = { ...mockUser, lastLoginAt: new Date() };
       prismaService.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateLastLogin('123');
+      const result = await service.updateLastLogin("123");
 
       expect(prismaService.user.update).toHaveBeenCalledWith({
-        where: { id: '123' },
+        where: { id: "123" },
         data: { lastLoginAt: expect.any(Date) },
       });
       expect(result).toEqual(updatedUser);
     });
   });
 
-  describe('linkWallet', () => {
-    it('should successfully link wallet to user', async () => {
-      const walletAddress = '0x1234567890abcdef';
+  describe("linkWallet", () => {
+    it("should successfully link wallet to user", async () => {
+      const walletAddress = "0x1234567890abcdef";
       const updatedUser = { ...mockUser, walletAddress };
 
       prismaService.user.findUnique.mockResolvedValue(null);
       prismaService.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.linkWallet('123', walletAddress);
+      const result = await service.linkWallet("123", walletAddress);
 
       expect(prismaService.user.update).toHaveBeenCalledWith({
-        where: { id: '123' },
+        where: { id: "123" },
         data: { walletAddress },
       });
       expect(result.walletAddress).toBe(walletAddress);
     });
 
-    it('should throw ConflictException if wallet is already linked to another user', async () => {
-      const walletAddress = '0x1234567890abcdef';
-      const otherUser = { ...mockUser, id: '456', walletAddress };
+    it("should throw ConflictException if wallet is already linked to another user", async () => {
+      const walletAddress = "0x1234567890abcdef";
+      const otherUser = { ...mockUser, id: "456", walletAddress };
 
       prismaService.user.findUnique.mockResolvedValue(otherUser);
 
-      await expect(service.linkWallet('123', walletAddress)).rejects.toThrow(ConflictException);
+      await expect(service.linkWallet("123", walletAddress)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it('should allow linking same wallet to same user (idempotent)', async () => {
-      const walletAddress = '0x1234567890abcdef';
+    it("should allow linking same wallet to same user (idempotent)", async () => {
+      const walletAddress = "0x1234567890abcdef";
       const userWithWallet = { ...mockUser, walletAddress };
 
       prismaService.user.findUnique.mockResolvedValue(userWithWallet);
       prismaService.user.update.mockResolvedValue(userWithWallet);
 
-      const result = await service.linkWallet('123', walletAddress);
+      const result = await service.linkWallet("123", walletAddress);
 
       expect(result.walletAddress).toBe(walletAddress);
     });

@@ -1,7 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 class ActionInstructionDto {
-  @ApiProperty({ enum: ['irrigation', 'ventilation', 'lighting'] })
+  @ApiProperty({ enum: ["irrigation", "ventilation", "lighting"] })
   type: string;
 
   @ApiProperty({ required: false })
@@ -9,8 +9,14 @@ class ActionInstructionDto {
 }
 
 export class DecisionResponseDto {
-  @ApiProperty({ 
-    enum: ['NO_ACTION', 'IRRIGATE', 'ALERT_TEMP_HIGH', 'ALERT_TEMP_LOW', 'ALERT_LIGHT_LOW'] 
+  @ApiProperty({
+    enum: [
+      "NO_ACTION",
+      "IRRIGATE",
+      "ALERT_TEMP_HIGH",
+      "ALERT_TEMP_LOW",
+      "ALERT_LIGHT_LOW",
+    ],
   })
   decision: string;
 

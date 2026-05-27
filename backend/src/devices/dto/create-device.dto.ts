@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsOptional, IsUUID } from "class-validator";
 
 export class CreateDeviceDto {
   @ApiProperty()
@@ -11,7 +11,7 @@ export class CreateDeviceDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'ID do cultivo associado' })
+  @ApiProperty({ description: "ID do cultivo associado" })
   @IsUUID()
   cultivationId: string;
 }

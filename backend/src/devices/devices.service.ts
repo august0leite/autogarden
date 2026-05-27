@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { CreateDeviceDto } from './dto';
-import * as crypto from 'crypto';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { CreateDeviceDto } from "./dto";
+import * as crypto from "crypto";
 
 @Injectable()
 export class DevicesService {
@@ -14,11 +18,11 @@ export class DevicesService {
     });
 
     if (!cultivation) {
-      throw new NotFoundException('CULTIVATION_NOT_FOUND');
+      throw new NotFoundException("CULTIVATION_NOT_FOUND");
     }
 
     if (cultivation.userId !== userId) {
-      throw new ConflictException('NOT_OWNER_OF_CULTIVATION');
+      throw new ConflictException("NOT_OWNER_OF_CULTIVATION");
     }
 
     // Verificar se cultivo já tem dispositivo
@@ -27,7 +31,7 @@ export class DevicesService {
     });
 
     if (existingDevice) {
-      throw new ConflictException('CULTIVATION_ALREADY_HAS_DEVICE');
+      throw new ConflictException("CULTIVATION_ALREADY_HAS_DEVICE");
     }
 
     // Gerar token único para o dispositivo
@@ -59,7 +63,7 @@ export class DevicesService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -72,11 +76,11 @@ export class DevicesService {
     });
 
     if (!device) {
-      throw new NotFoundException('DEVICE_NOT_FOUND');
+      throw new NotFoundException("DEVICE_NOT_FOUND");
     }
 
     if (device.cultivation.userId !== userId) {
-      throw new NotFoundException('DEVICE_NOT_FOUND');
+      throw new NotFoundException("DEVICE_NOT_FOUND");
     }
 
     return device;
@@ -91,7 +95,7 @@ export class DevicesService {
     });
 
     if (!device) {
-      throw new NotFoundException('INVALID_DEVICE_TOKEN');
+      throw new NotFoundException("INVALID_DEVICE_TOKEN");
     }
 
     return device;
@@ -101,13 +105,13 @@ export class DevicesService {
     return this.prisma.device.update({
       where: { id: deviceId },
       data: {
-        status: 'ONLINE',
+        status: "ONLINE",
         lastPingAt: new Date(),
       },
     });
   }
 
-  async updateStatus(deviceId: string, status: 'ONLINE' | 'OFFLINE' | 'ERROR') {
+  async updateStatus(deviceId: string, status: "ONLINE" | "OFFLINE" | "ERROR") {
     return this.prisma.device.update({
       where: { id: deviceId },
       data: { status },
@@ -120,17 +124,17 @@ export class DevicesService {
     // Buscar última leitura
     const lastReading = await this.prisma.reading.findFirst({
       where: { deviceId },
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
     });
 
     // Buscar última irrigação
     const lastIrrigation = await this.prisma.action.findFirst({
       where: {
         deviceId,
-        type: 'IRRIGATION',
-        status: 'EXECUTED',
+        type: "IRRIGATION",
+        status: "EXECUTED",
       },
-      orderBy: { executedAt: 'desc' },
+      orderBy: { executedAt: "desc" },
     });
 
     return {
@@ -153,6 +157,6 @@ export class DevicesService {
   }
 
   private generateDeviceToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(32).toString("hex");
   }
 }

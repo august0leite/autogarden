@@ -1,19 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ActionsService } from './actions.service';
-import { PrismaService } from '../database/prisma.service';
-import { CreateActionDto } from './dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ActionsService } from "./actions.service";
+import { PrismaService } from "../database/prisma.service";
+import { CreateActionDto } from "./dto";
 
-describe('ActionsService', () => {
+describe("ActionsService", () => {
   let service: ActionsService;
   let prismaService: jest.Mocked<PrismaService>;
 
   const mockAction = {
-    id: 'action-123',
-    deviceId: 'device-123',
-    type: 'IRRIGATION' as const,
+    id: "action-123",
+    deviceId: "device-123",
+    type: "IRRIGATION" as const,
     durationSeconds: 10,
-    status: 'PENDING' as const,
-    origin: 'MANUAL' as const,
+    status: "PENDING" as const,
+    origin: "MANUAL" as const,
     timestamp: new Date(),
     executedAt: null,
     decisionId: null,
@@ -42,128 +42,128 @@ describe('ActionsService', () => {
     prismaService = module.get(PrismaService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('createManualAction', () => {
-    it('should successfully create a manual irrigation action', async () => {
+  describe("createManualAction", () => {
+    it("should successfully create a manual irrigation action", async () => {
       const createDto: CreateActionDto = {
-        type: 'irrigation',
+        type: "irrigation",
         duration_seconds: 10,
       };
 
       prismaService.action.create.mockResolvedValue(mockAction);
 
-      const result = await service.createManualAction('device-123', createDto);
+      const result = await service.createManualAction("device-123", createDto);
 
       expect(prismaService.action.create).toHaveBeenCalledWith({
         data: {
-          deviceId: 'device-123',
-          type: 'IRRIGATION',
+          deviceId: "device-123",
+          type: "IRRIGATION",
           durationSeconds: 10,
-          origin: 'MANUAL',
-          status: 'PENDING',
+          origin: "MANUAL",
+          status: "PENDING",
         },
       });
       expect(result).toEqual({
-        status: 'scheduled',
-        origin: 'MANUAL',
+        status: "scheduled",
+        origin: "MANUAL",
         actionId: mockAction.id,
       });
     });
 
-    it('should convert action type to uppercase', async () => {
+    it("should convert action type to uppercase", async () => {
       const createDto: CreateActionDto = {
-        type: 'ventilation',
+        type: "ventilation",
         duration_seconds: 15,
       };
 
       const ventilationAction = {
         ...mockAction,
-        type: 'VENTILATION' as const,
+        type: "VENTILATION" as const,
         durationSeconds: 15,
       };
 
       prismaService.action.create.mockResolvedValue(ventilationAction);
 
-      await service.createManualAction('device-123', createDto);
+      await service.createManualAction("device-123", createDto);
 
       expect(prismaService.action.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          type: 'VENTILATION',
+          type: "VENTILATION",
         }),
       });
     });
 
-    it('should handle lighting action type', async () => {
+    it("should handle lighting action type", async () => {
       const createDto: CreateActionDto = {
-        type: 'lighting',
+        type: "lighting",
         duration_seconds: 20,
       };
 
       const lightingAction = {
         ...mockAction,
-        type: 'LIGHTING' as const,
+        type: "LIGHTING" as const,
         durationSeconds: 20,
       };
 
       prismaService.action.create.mockResolvedValue(lightingAction);
 
-      await service.createManualAction('device-123', createDto);
+      await service.createManualAction("device-123", createDto);
 
       expect(prismaService.action.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          type: 'LIGHTING',
+          type: "LIGHTING",
         }),
       });
     });
   });
 
-  describe('createAutoAction', () => {
-    it('should successfully create an automatic action', async () => {
+  describe("createAutoAction", () => {
+    it("should successfully create an automatic action", async () => {
       const autoAction = {
         ...mockAction,
-        origin: 'AUTO' as const,
-        decisionId: 'decision-123',
+        origin: "AUTO" as const,
+        decisionId: "decision-123",
       };
 
       prismaService.action.create.mockResolvedValue(autoAction);
 
       const result = await service.createAutoAction(
-        'device-123',
-        'decision-123',
-        'IRRIGATION',
+        "device-123",
+        "decision-123",
+        "IRRIGATION",
         10,
       );
 
       expect(prismaService.action.create).toHaveBeenCalledWith({
         data: {
-          deviceId: 'device-123',
-          decisionId: 'decision-123',
-          type: 'IRRIGATION',
+          deviceId: "device-123",
+          decisionId: "decision-123",
+          type: "IRRIGATION",
           durationSeconds: 10,
-          origin: 'AUTO',
-          status: 'PENDING',
+          origin: "AUTO",
+          status: "PENDING",
         },
       });
       expect(result).toEqual(autoAction);
     });
 
-    it('should create action without duration seconds when not provided', async () => {
+    it("should create action without duration seconds when not provided", async () => {
       const autoAction = {
         ...mockAction,
-        origin: 'AUTO' as const,
+        origin: "AUTO" as const,
         durationSeconds: undefined,
-        decisionId: 'decision-123',
+        decisionId: "decision-123",
       };
 
       prismaService.action.create.mockResolvedValue(autoAction as any);
 
       const result = await service.createAutoAction(
-        'device-123',
-        'decision-123',
-        'VENTILATION',
+        "device-123",
+        "decision-123",
+        "VENTILATION",
       );
 
       expect(prismaService.action.create).toHaveBeenCalledWith({
@@ -175,66 +175,66 @@ describe('ActionsService', () => {
     });
   });
 
-  describe('findAllByDevice', () => {
-    it('should return all actions for a device with default limit', async () => {
+  describe("findAllByDevice", () => {
+    it("should return all actions for a device with default limit", async () => {
       const actions = [mockAction];
 
       prismaService.action.findMany.mockResolvedValue(actions);
 
-      const result = await service.findAllByDevice('device-123');
+      const result = await service.findAllByDevice("device-123");
 
       expect(prismaService.action.findMany).toHaveBeenCalledWith({
-        where: { deviceId: 'device-123' },
-        orderBy: { timestamp: 'desc' },
+        where: { deviceId: "device-123" },
+        orderBy: { timestamp: "desc" },
         take: 100,
       });
       expect(result).toEqual(actions);
     });
 
-    it('should return actions with custom limit', async () => {
+    it("should return actions with custom limit", async () => {
       const actions = [mockAction];
 
       prismaService.action.findMany.mockResolvedValue(actions);
 
-      const result = await service.findAllByDevice('device-123', 50);
+      const result = await service.findAllByDevice("device-123", 50);
 
       expect(prismaService.action.findMany).toHaveBeenCalledWith({
-        where: { deviceId: 'device-123' },
-        orderBy: { timestamp: 'desc' },
+        where: { deviceId: "device-123" },
+        orderBy: { timestamp: "desc" },
         take: 50,
       });
       expect(result).toEqual(actions);
     });
 
-    it('should return empty array when no actions found', async () => {
+    it("should return empty array when no actions found", async () => {
       prismaService.action.findMany.mockResolvedValue([]);
 
-      const result = await service.findAllByDevice('device-123');
+      const result = await service.findAllByDevice("device-123");
 
       expect(result).toEqual([]);
     });
   });
 
-  describe('markAsExecuted', () => {
-    it('should mark action as executed with timestamp', async () => {
+  describe("markAsExecuted", () => {
+    it("should mark action as executed with timestamp", async () => {
       const executedAction = {
         ...mockAction,
-        status: 'EXECUTED' as const,
+        status: "EXECUTED" as const,
         executedAt: new Date(),
       };
 
       prismaService.action.update.mockResolvedValue(executedAction);
 
-      const result = await service.markAsExecuted('action-123');
+      const result = await service.markAsExecuted("action-123");
 
       expect(prismaService.action.update).toHaveBeenCalledWith({
-        where: { id: 'action-123' },
+        where: { id: "action-123" },
         data: {
-          status: 'EXECUTED',
+          status: "EXECUTED",
           executedAt: expect.any(Date),
         },
       });
-      expect(result.status).toBe('EXECUTED');
+      expect(result.status).toBe("EXECUTED");
       expect(result.executedAt).toBeDefined();
     });
   });

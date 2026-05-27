@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class DeviceResponseDto {
   @ApiProperty()
@@ -10,7 +10,7 @@ export class DeviceResponseDto {
   @ApiProperty({ required: false })
   description?: string;
 
-  @ApiProperty({ enum: ['ONLINE', 'OFFLINE', 'ERROR'] })
+  @ApiProperty({ enum: ["ONLINE", "OFFLINE", "ERROR"] })
   status: string;
 
   @ApiProperty({ required: false })

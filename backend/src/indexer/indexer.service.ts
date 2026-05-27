@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { ethers } from 'ethers';
-import { PrismaService } from '../database/prisma.service';
-import { MUSIC_CONTRACT_ABI } from './contract.abi';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { ethers } from "ethers";
+import { PrismaService } from "../database/prisma.service";
+import { MUSIC_CONTRACT_ABI } from "./contract.abi";
 
 interface BlockchainEvent {
   workId: bigint;
@@ -27,25 +27,29 @@ export class IndexerService {
     private readonly configService: ConfigService,
   ) {
     // Inicializa provider Alchemy
-    const alchemyApiKey = this.configService.get<string>('ALCHEMY_API_KEY');
-    const chainId = this.configService.get<string>('CHAIN_ID');
-    const contractAddress = this.configService.get<string>('CONTRACT_ADDRESS');
+    const alchemyApiKey = this.configService.get<string>("ALCHEMY_API_KEY");
+    const chainId = this.configService.get<string>("CHAIN_ID");
+    const contractAddress = this.configService.get<string>("CONTRACT_ADDRESS");
 
     if (!alchemyApiKey) {
-      throw new Error('ALCHEMY_API_KEY is not defined in environment variables');
+      throw new Error(
+        "ALCHEMY_API_KEY is not defined in environment variables",
+      );
     }
     if (!chainId) {
-      throw new Error('CHAIN_ID is not defined in environment variables');
+      throw new Error("CHAIN_ID is not defined in environment variables");
     }
     if (!contractAddress) {
-      throw new Error('CONTRACT_ADDRESS is not defined in environment variables');
+      throw new Error(
+        "CONTRACT_ADDRESS is not defined in environment variables",
+      );
     }
 
     this.contractAddress = contractAddress;
 
     // Determina network baseado no chainId
     const network = this.getNetworkFromChainId(chainId);
-    
+
     this.provider = new ethers.AlchemyProvider(network, alchemyApiKey);
     this.contract = new ethers.Contract(
       this.contractAddress,
@@ -62,13 +66,13 @@ export class IndexerService {
    */
   private getNetworkFromChainId(chainId: string): string {
     const networks: Record<string, string> = {
-      '1': 'mainnet',
-      '11155111': 'sepolia',
-      '5': 'goerli',
-      '137': 'matic',
-      '80001': 'maticmum',
+      "1": "mainnet",
+      "11155111": "sepolia",
+      "5": "goerli",
+      "137": "matic",
+      "80001": "maticmum",
     };
-    return networks[chainId] || 'sepolia'; // default para sepolia
+    return networks[chainId] || "sepolia"; // default para sepolia
   }
 
   /**
@@ -79,7 +83,7 @@ export class IndexerService {
   async syncEvents() {
     // Evita execuções concorrentes
     if (this.isRunning) {
-      this.logger.debug('Sync já em andamento, pulando...');
+      this.logger.debug("Sync já em andamento, pulando...");
       return;
     }
 
@@ -87,7 +91,7 @@ export class IndexerService {
       this.isRunning = true;
       await this.processNewBlocks();
     } catch (error) {
-      this.logger.error('Erro ao sincronizar eventos:', error);
+      this.logger.error("Erro ao sincronizar eventos:", error);
     } finally {
       this.isRunning = false;
     }
@@ -107,7 +111,7 @@ export class IndexerService {
     const events = await this.fetchNewEvents(lastBlock);
 
     if (events.length === 0) {
-      this.logger.debug('Nenhum evento novo');
+      this.logger.debug("Nenhum evento novo");
       return;
     }
 
@@ -127,7 +131,7 @@ export class IndexerService {
 
   /**
    * Busca eventos novos da blockchain de forma DETERMINÍSTICA
-   * 
+   *
    * Princípios:
    * ✅ Determinístico - sempre retorna os mesmos eventos para o mesmo range
    * ✅ Reexecutável - pode crashar e rodar novamente sem problemas
@@ -147,8 +151,12 @@ export class IndexerService {
       // Limita range para evitar timeouts
       // Alchemy free tier: max 10 blocos por request
       // Alchemy PAYG: pode usar ranges maiores (10000+)
-      const configuredBlockRange = this.configService.get<string>('INDEXER_BLOCK_RANGE');
-      const blockRange = configuredBlockRange ? Number(configuredBlockRange) : 10;
+      const configuredBlockRange = this.configService.get<string>(
+        "INDEXER_BLOCK_RANGE",
+      );
+      const blockRange = configuredBlockRange
+        ? Number(configuredBlockRange)
+        : 10;
       // Subtrai 1 porque o range é inclusivo em ambos os lados: [from, to]
       const toBlockNum = Math.min(fromBlockNum + blockRange - 1, latestBlock);
 
@@ -237,7 +245,7 @@ export class IndexerService {
         userId: user.id,
         title: event.title,
         metadataHash: event.metadataHash,
-        state: 'Registered',
+        state: "Registered",
       },
     });
 
@@ -249,13 +257,13 @@ export class IndexerService {
    */
   private async getOrCreateIndexerState() {
     let state = await this.prisma.indexerState.findUnique({
-      where: { id: 'singleton' },
+      where: { id: "singleton" },
     });
 
     if (!state) {
       state = await this.prisma.indexerState.create({
         data: {
-          id: 'singleton',
+          id: "singleton",
           lastBlockProcessed: BigInt(0),
         },
       });
@@ -269,7 +277,7 @@ export class IndexerService {
    */
   private async updateLastBlock(blockNumber: bigint) {
     await this.prisma.indexerState.update({
-      where: { id: 'singleton' },
+      where: { id: "singleton" },
       data: { lastBlockProcessed: blockNumber },
     });
   }
@@ -278,9 +286,9 @@ export class IndexerService {
    * Sincronização manual (útil para testes/admin)
    */
   async manualSync() {
-    this.logger.log('Sincronização manual iniciada');
+    this.logger.log("Sincronização manual iniciada");
     await this.processNewBlocks();
-    return { success: true, message: 'Sincronização concluída' };
+    return { success: true, message: "Sincronização concluída" };
   }
 
   /**
@@ -296,7 +304,7 @@ export class IndexerService {
   async reset(startBlock: bigint = BigInt(0)) {
     this.logger.warn(`⚠️  Resetando indexador para bloco ${startBlock}`);
     await this.prisma.indexerState.update({
-      where: { id: 'singleton' },
+      where: { id: "singleton" },
       data: { lastBlockProcessed: startBlock },
     });
     return { success: true, resetTo: startBlock };

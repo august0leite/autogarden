@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { DevicesService } from '../devices/devices.service';
-import { ActionsService } from '../actions/actions.service';
-import { DecisionEngineService } from './decision-engine.service';
-import { CreateReadingDto } from './dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { DevicesService } from "../devices/devices.service";
+import { ActionsService } from "../actions/actions.service";
+import { DecisionEngineService } from "./decision-engine.service";
+import { CreateReadingDto } from "./dto";
 
 @Injectable()
 export class ReadingsService {
@@ -21,7 +21,7 @@ export class ReadingsService {
     });
 
     if (!device) {
-      throw new NotFoundException('DEVICE_NOT_FOUND');
+      throw new NotFoundException("DEVICE_NOT_FOUND");
     }
 
     // Atualizar ping do dispositivo
@@ -98,7 +98,7 @@ export class ReadingsService {
 
     return this.prisma.reading.findMany({
       where,
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
       take: limit,
     });
   }
@@ -106,7 +106,7 @@ export class ReadingsService {
   async findDecisionsByDevice(deviceId: string, limit = 100) {
     return this.prisma.decision.findMany({
       where: { deviceId },
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
       take: limit,
     });
   }

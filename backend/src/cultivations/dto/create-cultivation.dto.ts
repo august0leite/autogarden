@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsOptional, IsNumber, Min, Max } from "class-validator";
 
 export class CreateCultivationDto {
   @ApiProperty()

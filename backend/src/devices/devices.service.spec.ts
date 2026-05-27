@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
-import { DevicesService } from './devices.service';
-import { PrismaService } from '../database/prisma.service';
-import { CreateDeviceDto } from './dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { NotFoundException, ConflictException } from "@nestjs/common";
+import { DevicesService } from "./devices.service";
+import { PrismaService } from "../database/prisma.service";
+import { CreateDeviceDto } from "./dto";
 
-describe('DevicesService', () => {
+describe("DevicesService", () => {
   let service: DevicesService;
   let prismaService: jest.Mocked<PrismaService>;
 
   const mockCultivation = {
-    id: 'cult-123',
-    userId: 'user-123',
-    name: 'Tomato Garden',
-    plantType: 'Tomato',
+    id: "cult-123",
+    userId: "user-123",
+    name: "Tomato Garden",
+    plantType: "Tomato",
     soilMoistureMin: 40,
     soilMoistureMax: 70,
     temperatureMin: 18,
@@ -24,20 +24,20 @@ describe('DevicesService', () => {
   };
 
   const mockDevice = {
-    id: 'device-123',
-    cultivationId: 'cult-123',
-    name: 'Arduino Uno',
-    model: 'Arduino Uno R3',
-    token: 'device-token-123',
-    status: 'ONLINE' as const,
+    id: "device-123",
+    cultivationId: "cult-123",
+    name: "Arduino Uno",
+    model: "Arduino Uno R3",
+    token: "device-token-123",
+    status: "ONLINE" as const,
     lastPingAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   const mockReading = {
-    id: 'reading-123',
-    deviceId: 'device-123',
+    id: "reading-123",
+    deviceId: "device-123",
     soilMoisture: 45,
     temperature: 25,
     light: 75,
@@ -45,15 +45,15 @@ describe('DevicesService', () => {
   };
 
   const mockAction = {
-    id: 'action-123',
-    deviceId: 'device-123',
-    type: 'IRRIGATION' as const,
+    id: "action-123",
+    deviceId: "device-123",
+    type: "IRRIGATION" as const,
     durationSeconds: 10,
-    status: 'EXECUTED' as const,
-    origin: 'AUTO' as const,
+    status: "EXECUTED" as const,
+    origin: "AUTO" as const,
     timestamp: new Date(),
     executedAt: new Date(),
-    decisionId: 'decision-123',
+    decisionId: "decision-123",
   };
 
   beforeEach(async () => {
@@ -89,17 +89,17 @@ describe('DevicesService', () => {
     prismaService = module.get(PrismaService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
-    it('should successfully create a device', async () => {
-      const userId = 'user-123';
+  describe("create", () => {
+    it("should successfully create a device", async () => {
+      const userId = "user-123";
       const createDto: CreateDeviceDto = {
-        cultivationId: 'cult-123',
-        name: 'Arduino Uno',
-        model: 'Arduino Uno R3',
+        cultivationId: "cult-123",
+        name: "Arduino Uno",
+        model: "Arduino Uno R3",
       };
 
       prismaService.cultivation.findUnique.mockResolvedValue(mockCultivation);
@@ -112,69 +112,75 @@ describe('DevicesService', () => {
         where: { id: createDto.cultivationId },
       });
       expect(prismaService.device.create).toHaveBeenCalled();
-      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty("token");
       expect(result).toEqual(mockDevice);
     });
 
-    it('should throw NotFoundException when cultivation not found', async () => {
+    it("should throw NotFoundException when cultivation not found", async () => {
       const createDto: CreateDeviceDto = {
-        cultivationId: 'cult-999',
-        name: 'Arduino Uno',
-        model: 'Arduino Uno R3',
+        cultivationId: "cult-999",
+        name: "Arduino Uno",
+        model: "Arduino Uno R3",
       };
 
       prismaService.cultivation.findUnique.mockResolvedValue(null);
 
-      await expect(service.create('user-123', createDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create("user-123", createDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
-    it('should throw ConflictException when user is not owner of cultivation', async () => {
+    it("should throw ConflictException when user is not owner of cultivation", async () => {
       const createDto: CreateDeviceDto = {
-        cultivationId: 'cult-123',
-        name: 'Arduino Uno',
-        model: 'Arduino Uno R3',
+        cultivationId: "cult-123",
+        name: "Arduino Uno",
+        model: "Arduino Uno R3",
       };
 
       prismaService.cultivation.findUnique.mockResolvedValue(mockCultivation);
 
-      await expect(service.create('other-user', createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create("other-user", createDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it('should throw ConflictException when cultivation already has device', async () => {
+    it("should throw ConflictException when cultivation already has device", async () => {
       const createDto: CreateDeviceDto = {
-        cultivationId: 'cult-123',
-        name: 'Arduino Uno',
-        model: 'Arduino Uno R3',
+        cultivationId: "cult-123",
+        name: "Arduino Uno",
+        model: "Arduino Uno R3",
       };
 
       prismaService.cultivation.findUnique.mockResolvedValue(mockCultivation);
       prismaService.device.findUnique.mockResolvedValue(mockDevice);
 
-      await expect(service.create('user-123', createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create("user-123", createDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
-  describe('findAllByUser', () => {
-    it('should return all devices for a user', async () => {
+  describe("findAllByUser", () => {
+    it("should return all devices for a user", async () => {
       const devices = [
         {
           ...mockDevice,
           cultivation: {
-            id: 'cult-123',
-            name: 'Tomato Garden',
-            plantType: 'Tomato',
+            id: "cult-123",
+            name: "Tomato Garden",
+            plantType: "Tomato",
           },
         },
       ];
 
       prismaService.device.findMany.mockResolvedValue(devices as any);
 
-      const result = await service.findAllByUser('user-123');
+      const result = await service.findAllByUser("user-123");
 
       expect(prismaService.device.findMany).toHaveBeenCalledWith({
         where: {
           cultivation: {
-            userId: 'user-123',
+            userId: "user-123",
           },
         },
         include: {
@@ -186,80 +192,92 @@ describe('DevicesService', () => {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       });
       expect(result).toEqual(devices);
     });
   });
 
-  describe('findOne', () => {
-    it('should return device when found and user is owner', async () => {
+  describe("findOne", () => {
+    it("should return device when found and user is owner", async () => {
       const deviceWithCultivation = {
         ...mockDevice,
         cultivation: mockCultivation,
       };
 
-      prismaService.device.findUnique.mockResolvedValue(deviceWithCultivation as any);
+      prismaService.device.findUnique.mockResolvedValue(
+        deviceWithCultivation as any,
+      );
 
-      const result = await service.findOne('device-123', 'user-123');
+      const result = await service.findOne("device-123", "user-123");
 
       expect(result).toEqual(deviceWithCultivation);
     });
 
-    it('should throw NotFoundException when device not found', async () => {
+    it("should throw NotFoundException when device not found", async () => {
       prismaService.device.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('device-999', 'user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne("device-999", "user-123")).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
-    it('should throw NotFoundException when user is not owner', async () => {
+    it("should throw NotFoundException when user is not owner", async () => {
       const deviceWithCultivation = {
         ...mockDevice,
         cultivation: mockCultivation,
       };
 
-      prismaService.device.findUnique.mockResolvedValue(deviceWithCultivation as any);
+      prismaService.device.findUnique.mockResolvedValue(
+        deviceWithCultivation as any,
+      );
 
-      await expect(service.findOne('device-123', 'other-user')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne("device-123", "other-user")).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
-  describe('findByToken', () => {
-    it('should return device when valid token provided', async () => {
+  describe("findByToken", () => {
+    it("should return device when valid token provided", async () => {
       const deviceWithCultivation = {
         ...mockDevice,
         cultivation: mockCultivation,
       };
 
-      prismaService.device.findUnique.mockResolvedValue(deviceWithCultivation as any);
+      prismaService.device.findUnique.mockResolvedValue(
+        deviceWithCultivation as any,
+      );
 
-      const result = await service.findByToken('device-token-123');
+      const result = await service.findByToken("device-token-123");
 
       expect(prismaService.device.findUnique).toHaveBeenCalledWith({
-        where: { token: 'device-token-123' },
+        where: { token: "device-token-123" },
         include: { cultivation: true },
       });
       expect(result).toEqual(deviceWithCultivation);
     });
 
-    it('should throw NotFoundException when invalid token', async () => {
+    it("should throw NotFoundException when invalid token", async () => {
       prismaService.device.findUnique.mockResolvedValue(null);
 
-      await expect(service.findByToken('invalid-token')).rejects.toThrow(NotFoundException);
+      await expect(service.findByToken("invalid-token")).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
-  describe('updatePing', () => {
-    it('should update device ping and set status to ONLINE', async () => {
+  describe("updatePing", () => {
+    it("should update device ping and set status to ONLINE", async () => {
       const updatedDevice = { ...mockDevice, lastPingAt: new Date() };
       prismaService.device.update.mockResolvedValue(updatedDevice);
 
-      const result = await service.updatePing('device-123');
+      const result = await service.updatePing("device-123");
 
       expect(prismaService.device.update).toHaveBeenCalledWith({
-        where: { id: 'device-123' },
+        where: { id: "device-123" },
         data: {
-          status: 'ONLINE',
+          status: "ONLINE",
           lastPingAt: expect.any(Date),
         },
       });
@@ -267,36 +285,38 @@ describe('DevicesService', () => {
     });
   });
 
-  describe('updateStatus', () => {
-    it('should update device status', async () => {
-      const updatedDevice = { ...mockDevice, status: 'OFFLINE' as const };
+  describe("updateStatus", () => {
+    it("should update device status", async () => {
+      const updatedDevice = { ...mockDevice, status: "OFFLINE" as const };
       prismaService.device.update.mockResolvedValue(updatedDevice);
 
-      const result = await service.updateStatus('device-123', 'OFFLINE');
+      const result = await service.updateStatus("device-123", "OFFLINE");
 
       expect(prismaService.device.update).toHaveBeenCalledWith({
-        where: { id: 'device-123' },
-        data: { status: 'OFFLINE' },
+        where: { id: "device-123" },
+        data: { status: "OFFLINE" },
       });
       expect(result).toEqual(updatedDevice);
     });
   });
 
-  describe('getStatus', () => {
-    it('should return device status with last reading and irrigation', async () => {
+  describe("getStatus", () => {
+    it("should return device status with last reading and irrigation", async () => {
       const deviceWithCultivation = {
         ...mockDevice,
         cultivation: mockCultivation,
       };
 
-      prismaService.device.findUnique.mockResolvedValue(deviceWithCultivation as any);
+      prismaService.device.findUnique.mockResolvedValue(
+        deviceWithCultivation as any,
+      );
       prismaService.reading.findFirst.mockResolvedValue(mockReading);
       prismaService.action.findFirst.mockResolvedValue(mockAction);
 
-      const result = await service.getStatus('device-123', 'user-123');
+      const result = await service.getStatus("device-123", "user-123");
 
-      expect(result).toHaveProperty('lastReading');
-      expect(result).toHaveProperty('lastIrrigation');
+      expect(result).toHaveProperty("lastReading");
+      expect(result).toHaveProperty("lastIrrigation");
       expect(result.lastReading).toEqual({
         soilMoisture: mockReading.soilMoisture,
         temperature: mockReading.temperature,
@@ -305,17 +325,19 @@ describe('DevicesService', () => {
       });
     });
 
-    it('should return status with undefined readings when no data available', async () => {
+    it("should return status with undefined readings when no data available", async () => {
       const deviceWithCultivation = {
         ...mockDevice,
         cultivation: mockCultivation,
       };
 
-      prismaService.device.findUnique.mockResolvedValue(deviceWithCultivation as any);
+      prismaService.device.findUnique.mockResolvedValue(
+        deviceWithCultivation as any,
+      );
       prismaService.reading.findFirst.mockResolvedValue(null);
       prismaService.action.findFirst.mockResolvedValue(null);
 
-      const result = await service.getStatus('device-123', 'user-123');
+      const result = await service.getStatus("device-123", "user-123");
 
       expect(result.lastReading).toBeUndefined();
       expect(result.lastIrrigation).toBeUndefined();

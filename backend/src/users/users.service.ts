@@ -1,5 +1,10 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
 
 interface CreateUserData {
   email: string;
@@ -14,12 +19,12 @@ export class UsersService {
   async create(data: CreateUserData) {
     // Validar que email foi fornecido
     if (!data.email) {
-      throw new BadRequestException('EMAIL_REQUIRED');
+      throw new BadRequestException("EMAIL_REQUIRED");
     }
 
     // Se forneceu email, precisa de senha
     if (data.email && !data.passwordHash) {
-      throw new BadRequestException('PASSWORD_REQUIRED_WITH_EMAIL');
+      throw new BadRequestException("PASSWORD_REQUIRED_WITH_EMAIL");
     }
 
     // Verificar se email já existe
@@ -28,10 +33,10 @@ export class UsersService {
     });
 
     if (existingUserByEmail) {
-      throw new ConflictException('EMAIL_ALREADY_EXISTS');
+      throw new ConflictException("EMAIL_ALREADY_EXISTS");
     }
 
-    return this.prisma.user.create({ 
+    return this.prisma.user.create({
       data: {
         email: data.email,
         passwordHash: data.passwordHash,
@@ -47,9 +52,9 @@ export class UsersService {
 
   async findById(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    
+
     if (!user) {
-      throw new NotFoundException('USER_NOT_FOUND');
+      throw new NotFoundException("USER_NOT_FOUND");
     }
 
     return {
@@ -79,9 +84,9 @@ export class UsersService {
   async linkWallet(userId: string, walletAddress: string) {
     // Verificar se a wallet já está vinculada a outro usuário
     const existingWallet = await this.findByWalletAddress(walletAddress);
-    
+
     if (existingWallet && existingWallet.id !== userId) {
-      throw new ConflictException('WALLET_ALREADY_LINKED');
+      throw new ConflictException("WALLET_ALREADY_LINKED");
     }
 
     return this.prisma.user.update({

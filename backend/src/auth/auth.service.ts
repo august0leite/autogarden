@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { UsersService } from "../users/users.service";
+import { LoginDto } from "./dto/login.dto";
+import { RegisterDto } from "./dto/register.dto";
 
 @Injectable()
 export class AuthService {
@@ -14,7 +14,7 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    
+
     const user = await this.usersService.create({
       name: registerDto.name,
       email: registerDto.email,
@@ -35,9 +35,9 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByEmail(loginDto.email);
-    
+
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+      throw new UnauthorizedException("INVALID_CREDENTIALS");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -46,7 +46,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+      throw new UnauthorizedException("INVALID_CREDENTIALS");
     }
 
     // Atualizar último login
@@ -65,11 +65,11 @@ export class AuthService {
    * Gera token JWT com informações do usuário
    */
   private generateToken(user: { id: string; email?: string | null }): string {
-    const payload: Record<string, any> = { 
+    const payload: Record<string, any> = {
       sub: user.id,
       email: user.email,
     };
-    
+
     return this.jwtService.sign(payload);
   }
 

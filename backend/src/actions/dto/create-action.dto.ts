@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEnum, IsNumber, IsOptional, Min } from "class-validator";
 
 export enum ActionType {
-  IRRIGATION = 'irrigation',
-  VENTILATION = 'ventilation',
-  LIGHTING = 'lighting',
+  IRRIGATION = "irrigation",
+  VENTILATION = "ventilation",
+  LIGHTING = "lighting",
 }
 
 export class CreateActionDto {

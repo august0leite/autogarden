@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { CreateCultivationDto, UpdateCultivationDto } from './dto';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { CreateCultivationDto, UpdateCultivationDto } from "./dto";
 
 @Injectable()
 export class CultivationsService {
@@ -27,7 +31,7 @@ export class CultivationsService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -40,11 +44,11 @@ export class CultivationsService {
     });
 
     if (!cultivation) {
-      throw new NotFoundException('CULTIVATION_NOT_FOUND');
+      throw new NotFoundException("CULTIVATION_NOT_FOUND");
     }
 
     if (cultivation.userId !== userId) {
-      throw new ForbiddenException('NOT_OWNER');
+      throw new ForbiddenException("NOT_OWNER");
     }
 
     return cultivation;

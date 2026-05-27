@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class ActionScheduledDto {
-  @ApiProperty({ enum: ['scheduled'] })
-  status: 'scheduled';
+  @ApiProperty({ enum: ["scheduled"] })
+  status: "scheduled";
 
-  @ApiProperty({ enum: ['MANUAL', 'AUTO'] })
+  @ApiProperty({ enum: ["MANUAL", "AUTO"] })
   origin: string;
 
   @ApiProperty()

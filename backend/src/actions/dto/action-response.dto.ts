@@ -1,19 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class ActionResponseDto {
   @ApiProperty()
   id: string;
 
-  @ApiProperty({ enum: ['IRRIGATION', 'VENTILATION', 'LIGHTING'] })
+  @ApiProperty({ enum: ["IRRIGATION", "VENTILATION", "LIGHTING"] })
   type: string;
 
   @ApiProperty({ required: false })
   durationSeconds?: number;
 
-  @ApiProperty({ enum: ['AUTO', 'MANUAL'] })
+  @ApiProperty({ enum: ["AUTO", "MANUAL"] })
   origin: string;
 
-  @ApiProperty({ enum: ['PENDING', 'EXECUTED', 'FAILED'] })
+  @ApiProperty({ enum: ["PENDING", "EXECUTED", "FAILED"] })
   status: string;
 
   @ApiProperty()

@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
 
 interface DecisionResult {
-  decision: 'NO_ACTION' | 'IRRIGATE' | 'ALERT_TEMP_HIGH' | 'ALERT_TEMP_LOW' | 'ALERT_LIGHT_LOW';
+  decision:
+    | "NO_ACTION"
+    | "IRRIGATE"
+    | "ALERT_TEMP_HIGH"
+    | "ALERT_TEMP_LOW"
+    | "ALERT_LIGHT_LOW";
   reason: string;
   action?: {
-    type: 'IRRIGATION' | 'VENTILATION' | 'LIGHTING';
+    type: "IRRIGATION" | "VENTILATION" | "LIGHTING";
     durationSeconds?: number;
   };
 }
@@ -26,8 +31,8 @@ export class DecisionEngineService {
 
     if (!cultivation) {
       return {
-        decision: 'NO_ACTION',
-        reason: 'cultivation_not_found',
+        decision: "NO_ACTION",
+        reason: "cultivation_not_found",
       };
     }
 
@@ -35,10 +40,10 @@ export class DecisionEngineService {
     const lastIrrigation = await this.prisma.action.findFirst({
       where: {
         deviceId,
-        type: 'IRRIGATION',
-        status: 'EXECUTED',
+        type: "IRRIGATION",
+        status: "EXECUTED",
       },
-      orderBy: { executedAt: 'desc' },
+      orderBy: { executedAt: "desc" },
     });
 
     const now = new Date();
@@ -52,16 +57,16 @@ export class DecisionEngineService {
     if (reading.soilMoisture < cultivation.soilMoistureMin) {
       if (inCooldown) {
         return {
-          decision: 'NO_ACTION',
-          reason: 'soil_moisture_low_but_in_cooldown',
+          decision: "NO_ACTION",
+          reason: "soil_moisture_low_but_in_cooldown",
         };
       }
 
       return {
-        decision: 'IRRIGATE',
-        reason: 'soil_moisture_below_threshold',
+        decision: "IRRIGATE",
+        reason: "soil_moisture_below_threshold",
         action: {
-          type: 'IRRIGATION',
+          type: "IRRIGATION",
           durationSeconds: 10, // Valor padrão, pode ser configurável
         },
       };
@@ -70,31 +75,31 @@ export class DecisionEngineService {
     // Prioridade 2: Temperatura alta
     if (reading.temperature > cultivation.temperatureMax) {
       return {
-        decision: 'ALERT_TEMP_HIGH',
-        reason: 'temperature_above_threshold',
+        decision: "ALERT_TEMP_HIGH",
+        reason: "temperature_above_threshold",
       };
     }
 
     // Prioridade 3: Temperatura baixa
     if (reading.temperature < cultivation.temperatureMin) {
       return {
-        decision: 'ALERT_TEMP_LOW',
-        reason: 'temperature_below_threshold',
+        decision: "ALERT_TEMP_LOW",
+        reason: "temperature_below_threshold",
       };
     }
 
     // Prioridade 4: Luz baixa
     if (reading.light < cultivation.lightMin) {
       return {
-        decision: 'ALERT_LIGHT_LOW',
-        reason: 'light_below_threshold',
+        decision: "ALERT_LIGHT_LOW",
+        reason: "light_below_threshold",
       };
     }
 
     // Tudo dentro dos parâmetros
     return {
-      decision: 'NO_ACTION',
-      reason: 'within_optimal_range',
+      decision: "NO_ACTION",
+      reason: "within_optimal_range",
     };
   }
 }

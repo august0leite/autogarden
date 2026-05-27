@@ -1,27 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { CreateActionDto } from './dto';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { CreateActionDto } from "./dto";
 
 @Injectable()
 export class ActionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createManualAction(deviceId: string, createDto: CreateActionDto) {
-    const actionType = createDto.type.toUpperCase() as 'IRRIGATION' | 'VENTILATION' | 'LIGHTING';
+    const actionType = createDto.type.toUpperCase() as
+      | "IRRIGATION"
+      | "VENTILATION"
+      | "LIGHTING";
 
     const action = await this.prisma.action.create({
       data: {
         deviceId,
         type: actionType,
         durationSeconds: createDto.duration_seconds,
-        origin: 'MANUAL',
-        status: 'PENDING',
+        origin: "MANUAL",
+        status: "PENDING",
       },
     });
 
     return {
-      status: 'scheduled' as const,
-      origin: 'MANUAL',
+      status: "scheduled" as const,
+      origin: "MANUAL",
       actionId: action.id,
     };
   }
@@ -29,7 +32,7 @@ export class ActionsService {
   async createAutoAction(
     deviceId: string,
     decisionId: string,
-    type: 'IRRIGATION' | 'VENTILATION' | 'LIGHTING',
+    type: "IRRIGATION" | "VENTILATION" | "LIGHTING",
     durationSeconds?: number,
   ) {
     return this.prisma.action.create({
@@ -38,8 +41,8 @@ export class ActionsService {
         decisionId,
         type,
         durationSeconds,
-        origin: 'AUTO',
-        status: 'PENDING',
+        origin: "AUTO",
+        status: "PENDING",
       },
     });
   }
@@ -47,7 +50,7 @@ export class ActionsService {
   async findAllByDevice(deviceId: string, limit = 100) {
     return this.prisma.action.findMany({
       where: { deviceId },
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
       take: limit,
     });
   }
@@ -56,7 +59,7 @@ export class ActionsService {
     return this.prisma.action.update({
       where: { id: actionId },
       data: {
-        status: 'EXECUTED',
+        status: "EXECUTED",
         executedAt: new Date(),
       },
     });
