@@ -2,7 +2,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ethers } from "ethers";
-import { PrismaService } from "../database/prisma.service";
 import { MUSIC_CONTRACT_ABI } from "./contract.abi";
 
 interface BlockchainEvent {
@@ -18,14 +17,12 @@ interface BlockchainEvent {
 export class IndexerService {
   private readonly logger = new Logger(IndexerService.name);
   private isRunning = false;
+  private lastBlockProcessed = BigInt(0);
   private provider: ethers.AlchemyProvider;
   private contract: ethers.Contract;
   private contractAddress: string;
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     // Inicializa provider Alchemy
     const alchemyApiKey = this.configService.get<string>("ALCHEMY_API_KEY");
     const chainId = this.configService.get<string>("CHAIN_ID");
@@ -102,7 +99,7 @@ export class IndexerService {
    */
   private async processNewBlocks() {
     // 1. Lê último bloco processado
-    const state = await this.getOrCreateIndexerState();
+    const state = this.getOrCreateIndexerState();
     const lastBlock = state.lastBlockProcessed;
 
     this.logger.debug(`Último bloco processado: ${lastBlock}`);
@@ -120,12 +117,12 @@ export class IndexerService {
     // 3. Processa evento por evento
     let newLastBlock = lastBlock;
     for (const event of events) {
-      await this.processEvent(event);
+      this.processEvent(event);
       newLastBlock = event.blockNumber;
     }
 
     // 4. Persiste progresso
-    await this.updateLastBlock(newLastBlock);
+    this.updateLastBlock(newLastBlock);
     this.logger.log(`Indexador atualizado até bloco ${newLastBlock}`);
   }
 
@@ -212,74 +209,27 @@ export class IndexerService {
   /**
    * Processa um evento individual de forma idempotente
    */
-  private async processEvent(event: BlockchainEvent) {
-    // Idempotência: verifica se evento já foi processado
-    const existing = await this.prisma.track.findUnique({
-      where: { workId: event.workId },
-    });
-
-    if (existing) {
-      this.logger.debug(`Track ${event.workId} já existe, pulando...`);
-      return;
-    }
-
-    // Encontra ou cria usuário pela wallet
-    let user = await this.prisma.user.findUnique({
-      where: { walletAddress: event.creator },
-    });
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          walletAddress: event.creator,
-        },
-      });
-      this.logger.log(`Novo usuário criado: ${event.creator}`);
-    }
-
-    // Cria track
-    await this.prisma.track.create({
-      data: {
-        workId: event.workId,
-        creatorWallet: event.creator,
-        userId: user.id,
-        title: event.title,
-        metadataHash: event.metadataHash,
-        state: "Registered",
-      },
-    });
-
-    this.logger.log(`Track ${event.workId} indexado: ${event.title}`);
+  private processEvent(event: BlockchainEvent) {
+    this.logger.warn(
+      `Evento ignorado: persistência de indexador indisponível para schema atual (workId=${event.workId.toString()})`,
+    );
   }
 
   /**
    * Obtém ou cria estado do indexador
    */
-  private async getOrCreateIndexerState() {
-    let state = await this.prisma.indexerState.findUnique({
-      where: { id: "singleton" },
-    });
-
-    if (!state) {
-      state = await this.prisma.indexerState.create({
-        data: {
-          id: "singleton",
-          lastBlockProcessed: BigInt(0),
-        },
-      });
-    }
-
-    return state;
+  private getOrCreateIndexerState() {
+    return {
+      id: "singleton",
+      lastBlockProcessed: this.lastBlockProcessed,
+    };
   }
 
   /**
    * Atualiza último bloco processado
    */
-  private async updateLastBlock(blockNumber: bigint) {
-    await this.prisma.indexerState.update({
-      where: { id: "singleton" },
-      data: { lastBlockProcessed: blockNumber },
-    });
+  private updateLastBlock(blockNumber: bigint) {
+    this.lastBlockProcessed = blockNumber;
   }
 
   /**
@@ -294,19 +244,16 @@ export class IndexerService {
   /**
    * Retorna estado atual do indexador
    */
-  async getState() {
+  getState() {
     return this.getOrCreateIndexerState();
   }
 
   /**
    * Reset do indexador (APENAS DESENVOLVIMENTO)
    */
-  async reset(startBlock: bigint = BigInt(0)) {
+  reset(startBlock: bigint = BigInt(0)) {
     this.logger.warn(`⚠️  Resetando indexador para bloco ${startBlock}`);
-    await this.prisma.indexerState.update({
-      where: { id: "singleton" },
-      data: { lastBlockProcessed: startBlock },
-    });
+    this.lastBlockProcessed = startBlock;
     return { success: true, resetTo: startBlock };
   }
 }

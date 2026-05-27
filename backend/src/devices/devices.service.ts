@@ -54,7 +54,16 @@ export class DevicesService {
           userId,
         },
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        model: true,
+        description: true,
+        status: true,
+        lastPingAt: true,
+        cultivationId: true,
+        createdAt: true,
+        updatedAt: true,
         cultivation: {
           select: {
             id: true,
@@ -70,8 +79,24 @@ export class DevicesService {
   async findOne(deviceId: string, userId: string) {
     const device = await this.prisma.device.findUnique({
       where: { id: deviceId },
-      include: {
-        cultivation: true,
+      select: {
+        id: true,
+        name: true,
+        model: true,
+        description: true,
+        status: true,
+        lastPingAt: true,
+        cultivationId: true,
+        createdAt: true,
+        updatedAt: true,
+        cultivation: {
+          select: {
+            id: true,
+            name: true,
+            plantType: true,
+            userId: true,
+          },
+        },
       },
     });
 
@@ -83,7 +108,17 @@ export class DevicesService {
       throw new NotFoundException("DEVICE_NOT_FOUND");
     }
 
-    return device;
+    const { cultivation, ...safeDevice } = device;
+    const safeCultivation = {
+      id: cultivation.id,
+      name: cultivation.name,
+      plantType: cultivation.plantType,
+    };
+
+    return {
+      ...safeDevice,
+      cultivation: safeCultivation,
+    };
   }
 
   async findByToken(token: string) {

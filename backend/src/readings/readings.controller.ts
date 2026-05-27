@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   Controller,
+  ForbiddenException,
   Get,
   Post,
   Body,
@@ -34,7 +36,7 @@ import { Public } from "../auth/decorators/public.decorator";
 import { DeviceAuthGuard } from "../devices/guards/device-auth.guard";
 
 @ApiTags("devices")
-@Controller("devices")
+@Controller("v1/devices")
 export class ReadingsController {
   constructor(
     private readonly readingsService: ReadingsService,
@@ -56,7 +58,7 @@ export class ReadingsController {
   ) {
     // Verificar se deviceId do parâmetro corresponde ao token
     if (deviceId !== deviceIdFromToken) {
-      throw new Error("DEVICE_ID_MISMATCH");
+      throw new ForbiddenException("DEVICE_ID_MISMATCH");
     }
     return this.readingsService.createReading(deviceId, createDto);
   }
@@ -74,7 +76,7 @@ export class ReadingsController {
     @CurrentDevice("id") deviceIdFromToken: string,
   ) {
     if (deviceId !== deviceIdFromToken) {
-      throw new Error("DEVICE_ID_MISMATCH");
+      throw new ForbiddenException("DEVICE_ID_MISMATCH");
     }
     await this.devicesService.updatePing(deviceId);
     return { status: "online" };
@@ -91,7 +93,7 @@ export class ReadingsController {
   @ApiResponse({ status: 200, type: [ReadingResponseDto] })
   async getReadings(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Query("from") from?: string,
     @Query("to") to?: string,
     @Query("limit") limit?: string,
@@ -99,10 +101,14 @@ export class ReadingsController {
     // Validar que dispositivo pertence ao usuário
     await this.devicesService.findOne(deviceId, userId);
 
+    const parsedFrom = this.parseDateParam("from", from);
+    const parsedTo = this.parseDateParam("to", to);
+    const parsedLimit = this.parseLimitParam(limit);
+
     return this.readingsService.findAllByDevice(deviceId, {
-      from: from ? new Date(from) : undefined,
-      to: to ? new Date(to) : undefined,
-      limit: limit ? parseInt(limit, 10) : undefined,
+      from: parsedFrom,
+      to: parsedTo,
+      limit: parsedLimit,
     });
   }
 
@@ -113,7 +119,7 @@ export class ReadingsController {
   @ApiResponse({ status: 200, type: [DecisionHistoryDto] })
   async getDecisions(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Query("limit") limit?: string,
   ) {
     // Validar que dispositivo pertence ao usuário
@@ -121,7 +127,7 @@ export class ReadingsController {
 
     return this.readingsService.findDecisionsByDevice(
       deviceId,
-      limit ? parseInt(limit, 10) : undefined,
+      this.parseLimitParam(limit),
     );
   }
 
@@ -132,7 +138,7 @@ export class ReadingsController {
   @ApiResponse({ status: 200, type: [ActionResponseDto] })
   async getActions(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Query("limit") limit?: string,
   ) {
     // Validar que dispositivo pertence ao usuário
@@ -140,7 +146,7 @@ export class ReadingsController {
 
     return this.actionsService.findAllByDevice(
       deviceId,
-      limit ? parseInt(limit, 10) : undefined,
+      this.parseLimitParam(limit),
     );
   }
 
@@ -150,12 +156,41 @@ export class ReadingsController {
   @ApiResponse({ status: 201, type: ActionScheduledDto })
   async createManualAction(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Body() createDto: CreateActionDto,
   ) {
     // Validar que dispositivo pertence ao usuário
     await this.devicesService.findOne(deviceId, userId);
 
     return this.actionsService.createManualAction(deviceId, createDto);
+  }
+
+  private parseDateParam(
+    param: "from" | "to",
+    value?: string,
+  ): Date | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException(`INVALID_${param.toUpperCase()}_DATE`);
+    }
+
+    return date;
+  }
+
+  private parseLimitParam(value?: string): number | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed)) {
+      throw new BadRequestException("INVALID_LIMIT");
+    }
+
+    return Math.min(Math.max(parsed, 1), 100);
   }
 }

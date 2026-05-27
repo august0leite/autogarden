@@ -1,7 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsNumber, Min, Max } from "class-validator";
+import { IsOptional, IsNumber, Min, Max, IsString } from "class-validator";
 
 export class UpdateCultivationDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  plantType?: string;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()

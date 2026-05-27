@@ -39,7 +39,19 @@ export class CultivationsService {
     const cultivation = await this.prisma.cultivation.findUnique({
       where: { id },
       include: {
-        device: true,
+        device: {
+          select: {
+            id: true,
+            name: true,
+            model: true,
+            description: true,
+            status: true,
+            lastPingAt: true,
+            cultivationId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
 

@@ -138,7 +138,21 @@ describe("CultivationsService", () => {
 
       expect(prismaService.cultivation.findUnique).toHaveBeenCalledWith({
         where: { id: "cult-123" },
-        include: { device: true },
+        include: {
+          device: {
+            select: {
+              id: true,
+              name: true,
+              model: true,
+              description: true,
+              status: true,
+              lastPingAt: true,
+              cultivationId: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
       });
       expect(result).toEqual(cultivationWithDevice);
     });

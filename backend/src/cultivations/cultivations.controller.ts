@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  UseGuards,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -24,7 +23,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 
 @ApiTags("cultivations")
 @ApiBearerAuth()
-@Controller("cultivations")
+@Controller("v1/cultivations")
 export class CultivationsController {
   constructor(private readonly cultivationsService: CultivationsService) {}
 
@@ -32,7 +31,7 @@ export class CultivationsController {
   @ApiOperation({ summary: "Criar novo cultivo" })
   @ApiResponse({ status: 201, type: CultivationResponseDto })
   async create(
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Body() createDto: CreateCultivationDto,
   ) {
     return this.cultivationsService.create(userId, createDto);
@@ -41,14 +40,17 @@ export class CultivationsController {
   @Get()
   @ApiOperation({ summary: "Listar cultivos do usuário" })
   @ApiResponse({ status: 200, type: [CultivationResponseDto] })
-  async findAll(@CurrentUser("id") userId: string) {
+  async findAll(@CurrentUser("userId") userId: string) {
     return this.cultivationsService.findAllByUser(userId);
   }
 
   @Get(":id")
   @ApiOperation({ summary: "Obter cultivo específico" })
   @ApiResponse({ status: 200, type: CultivationResponseDto })
-  async findOne(@Param("id") id: string, @CurrentUser("id") userId: string) {
+  async findOne(
+    @Param("id") id: string,
+    @CurrentUser("userId") userId: string,
+  ) {
     return this.cultivationsService.findOne(id, userId);
   }
 
@@ -57,7 +59,7 @@ export class CultivationsController {
   @ApiResponse({ status: 200, type: CultivationResponseDto })
   async update(
     @Param("id") id: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Body() updateDto: UpdateCultivationDto,
   ) {
     return this.cultivationsService.update(id, userId, updateDto);
@@ -66,7 +68,7 @@ export class CultivationsController {
   @Delete(":id")
   @ApiOperation({ summary: "Deletar cultivo" })
   @ApiResponse({ status: 200 })
-  async delete(@Param("id") id: string, @CurrentUser("id") userId: string) {
+  async delete(@Param("id") id: string, @CurrentUser("userId") userId: string) {
     return this.cultivationsService.delete(id, userId);
   }
 }

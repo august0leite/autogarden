@@ -4,15 +4,11 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
 import { DevicesService } from "../devices.service";
 
 @Injectable()
 export class DeviceAuthGuard implements CanActivate {
-  constructor(
-    private readonly devicesService: DevicesService,
-    private reflector: Reflector,
-  ) {}
+  constructor(private readonly devicesService: DevicesService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -32,7 +28,7 @@ export class DeviceAuthGuard implements CanActivate {
       const device = await this.devicesService.findByToken(token);
       request.device = device;
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException("INVALID_DEVICE_TOKEN");
     }
   }

@@ -19,7 +19,7 @@ export class DevicesController {
   @ApiOperation({ summary: "Criar novo dispositivo" })
   @ApiResponse({ status: 201, type: DeviceResponseDto })
   async create(
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
     @Body() createDto: CreateDeviceDto,
   ) {
     return this.devicesService.create(userId, createDto);
@@ -28,7 +28,7 @@ export class DevicesController {
   @Get()
   @ApiOperation({ summary: "Listar dispositivos do usuário" })
   @ApiResponse({ status: 200, type: [DeviceResponseDto] })
-  async findAll(@CurrentUser("id") userId: string) {
+  async findAll(@CurrentUser("userId") userId: string) {
     return this.devicesService.findAllByUser(userId);
   }
 
@@ -37,7 +37,7 @@ export class DevicesController {
   @ApiResponse({ status: 200, type: DeviceResponseDto })
   async findOne(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
   ) {
     return this.devicesService.findOne(deviceId, userId);
   }
@@ -47,7 +47,7 @@ export class DevicesController {
   @ApiResponse({ status: 200, type: DeviceStatusDto })
   async getStatus(
     @Param("deviceId") deviceId: string,
-    @CurrentUser("id") userId: string,
+    @CurrentUser("userId") userId: string,
   ) {
     return this.devicesService.getStatus(deviceId, userId);
   }

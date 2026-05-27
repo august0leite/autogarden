@@ -11,6 +11,11 @@ export class CreateDeviceDto {
   @IsString()
   description?: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  model?: string;
+
   @ApiProperty({ description: "ID do cultivo associado" })
   @IsUUID()
   cultivationId: string;

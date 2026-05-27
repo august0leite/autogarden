@@ -183,7 +183,16 @@ describe("DevicesService", () => {
             userId: "user-123",
           },
         },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          model: true,
+          description: true,
+          status: true,
+          lastPingAt: true,
+          cultivationId: true,
+          createdAt: true,
+          updatedAt: true,
           cultivation: {
             select: {
               id: true,
@@ -211,7 +220,11 @@ describe("DevicesService", () => {
 
       const result = await service.findOne("device-123", "user-123");
 
-      expect(result).toEqual(deviceWithCultivation);
+      const { userId: _userId, ...cultivationWithoutUserId } = mockCultivation;
+      expect(result).toEqual({
+        ...deviceWithCultivation,
+        cultivation: cultivationWithoutUserId,
+      });
     });
 
     it("should throw NotFoundException when device not found", async () => {
