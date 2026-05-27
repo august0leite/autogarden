@@ -26,7 +26,7 @@ export class UsersController {
   })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Usuário não encontrado" })
-  async getMe(@CurrentUser("sub") userId: string): Promise<UserResponseDto> {
+  async getMe(@CurrentUser("userId") userId: string): Promise<UserResponseDto> {
     return this.usersService.findById(userId);
   }
 }
