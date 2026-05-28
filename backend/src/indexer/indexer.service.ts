@@ -1,10 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { ethers } from 'ethers';
-import { PrismaService } from '../database/prisma.service';
-import { TracksService } from '../tracks/tracks.service';
-import { MUSIC_CONTRACT_ABI } from './contract.abi';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { ethers } from "ethers";
+import { MUSIC_CONTRACT_ABI } from "./contract.abi";
 
 interface BlockchainEvent {
   workId: bigint;
@@ -19,35 +17,36 @@ interface BlockchainEvent {
 export class IndexerService {
   private readonly logger = new Logger(IndexerService.name);
   private isRunning = false;
+  private lastBlockProcessed = BigInt(0);
   private provider: ethers.AlchemyProvider;
   private contract: ethers.Contract;
   private contractAddress: string;
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly tracksService: TracksService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     // Inicializa provider Alchemy
-    const alchemyApiKey = this.configService.get<string>('ALCHEMY_API_KEY');
-    const chainId = this.configService.get<string>('CHAIN_ID');
-    const contractAddress = this.configService.get<string>('CONTRACT_ADDRESS');
+    const alchemyApiKey = this.configService.get<string>("ALCHEMY_API_KEY");
+    const chainId = this.configService.get<string>("CHAIN_ID");
+    const contractAddress = this.configService.get<string>("CONTRACT_ADDRESS");
 
     if (!alchemyApiKey) {
-      throw new Error('ALCHEMY_API_KEY is not defined in environment variables');
+      throw new Error(
+        "ALCHEMY_API_KEY is not defined in environment variables",
+      );
     }
     if (!chainId) {
-      throw new Error('CHAIN_ID is not defined in environment variables');
+      throw new Error("CHAIN_ID is not defined in environment variables");
     }
     if (!contractAddress) {
-      throw new Error('CONTRACT_ADDRESS is not defined in environment variables');
+      throw new Error(
+        "CONTRACT_ADDRESS is not defined in environment variables",
+      );
     }
 
     this.contractAddress = contractAddress;
 
     // Determina network baseado no chainId
     const network = this.getNetworkFromChainId(chainId);
-    
+
     this.provider = new ethers.AlchemyProvider(network, alchemyApiKey);
     this.contract = new ethers.Contract(
       this.contractAddress,
@@ -64,13 +63,13 @@ export class IndexerService {
    */
   private getNetworkFromChainId(chainId: string): string {
     const networks: Record<string, string> = {
-      '1': 'mainnet',
-      '11155111': 'sepolia',
-      '5': 'goerli',
-      '137': 'matic',
-      '80001': 'maticmum',
+      "1": "mainnet",
+      "11155111": "sepolia",
+      "5": "goerli",
+      "137": "matic",
+      "80001": "maticmum",
     };
-    return networks[chainId] || 'sepolia'; // default para sepolia
+    return networks[chainId] || "sepolia"; // default para sepolia
   }
 
   /**
@@ -81,7 +80,7 @@ export class IndexerService {
   async syncEvents() {
     // Evita execuções concorrentes
     if (this.isRunning) {
-      this.logger.debug('Sync já em andamento, pulando...');
+      this.logger.debug("Sync já em andamento, pulando...");
       return;
     }
 
@@ -89,7 +88,7 @@ export class IndexerService {
       this.isRunning = true;
       await this.processNewBlocks();
     } catch (error) {
-      this.logger.error('Erro ao sincronizar eventos:', error);
+      this.logger.error("Erro ao sincronizar eventos:", error);
     } finally {
       this.isRunning = false;
     }
@@ -100,7 +99,7 @@ export class IndexerService {
    */
   private async processNewBlocks() {
     // 1. Lê último bloco processado
-    const state = await this.getOrCreateIndexerState();
+    const state = this.getOrCreateIndexerState();
     const lastBlock = state.lastBlockProcessed;
 
     this.logger.debug(`Último bloco processado: ${lastBlock}`);
@@ -109,7 +108,7 @@ export class IndexerService {
     const events = await this.fetchNewEvents(lastBlock);
 
     if (events.length === 0) {
-      this.logger.debug('Nenhum evento novo');
+      this.logger.debug("Nenhum evento novo");
       return;
     }
 
@@ -118,18 +117,18 @@ export class IndexerService {
     // 3. Processa evento por evento
     let newLastBlock = lastBlock;
     for (const event of events) {
-      await this.processEvent(event);
+      this.processEvent(event);
       newLastBlock = event.blockNumber;
     }
 
     // 4. Persiste progresso
-    await this.updateLastBlock(newLastBlock);
+    this.updateLastBlock(newLastBlock);
     this.logger.log(`Indexador atualizado até bloco ${newLastBlock}`);
   }
 
   /**
    * Busca eventos novos da blockchain de forma DETERMINÍSTICA
-   * 
+   *
    * Princípios:
    * ✅ Determinístico - sempre retorna os mesmos eventos para o mesmo range
    * ✅ Reexecutável - pode crashar e rodar novamente sem problemas
@@ -149,8 +148,12 @@ export class IndexerService {
       // Limita range para evitar timeouts
       // Alchemy free tier: max 10 blocos por request
       // Alchemy PAYG: pode usar ranges maiores (10000+)
-      const configuredBlockRange = this.configService.get<string>('INDEXER_BLOCK_RANGE');
-      const blockRange = configuredBlockRange ? Number(configuredBlockRange) : 10;
+      const configuredBlockRange = this.configService.get<string>(
+        "INDEXER_BLOCK_RANGE",
+      );
+      const blockRange = configuredBlockRange
+        ? Number(configuredBlockRange)
+        : 10;
       // Subtrai 1 porque o range é inclusivo em ambos os lados: [from, to]
       const toBlockNum = Math.min(fromBlockNum + blockRange - 1, latestBlock);
 
@@ -206,101 +209,51 @@ export class IndexerService {
   /**
    * Processa um evento individual de forma idempotente
    */
-  private async processEvent(event: BlockchainEvent) {
-    // Idempotência: verifica se evento já foi processado
-    const existing = await this.prisma.track.findUnique({
-      where: { workId: event.workId },
-    });
-
-    if (existing) {
-      this.logger.debug(`Track ${event.workId} já existe, pulando...`);
-      return;
-    }
-
-    // Encontra ou cria usuário pela wallet
-    let user = await this.prisma.user.findUnique({
-      where: { walletAddress: event.creator },
-    });
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          walletAddress: event.creator,
-        },
-      });
-      this.logger.log(`Novo usuário criado: ${event.creator}`);
-    }
-
-    // Cria track
-    await this.prisma.track.create({
-      data: {
-        workId: event.workId,
-        creatorWallet: event.creator,
-        userId: user.id,
-        title: event.title,
-        metadataHash: event.metadataHash,
-        state: 'Registered',
-      },
-    });
-
-    this.logger.log(`Track ${event.workId} indexado: ${event.title}`);
+  private processEvent(event: BlockchainEvent) {
+    this.logger.warn(
+      `Evento ignorado: persistência de indexador indisponível para schema atual (workId=${event.workId.toString()})`,
+    );
   }
 
   /**
    * Obtém ou cria estado do indexador
    */
-  private async getOrCreateIndexerState() {
-    let state = await this.prisma.indexerState.findUnique({
-      where: { id: 'singleton' },
-    });
-
-    if (!state) {
-      state = await this.prisma.indexerState.create({
-        data: {
-          id: 'singleton',
-          lastBlockProcessed: BigInt(0),
-        },
-      });
-    }
-
-    return state;
+  private getOrCreateIndexerState() {
+    return {
+      id: "singleton",
+      lastBlockProcessed: this.lastBlockProcessed,
+    };
   }
 
   /**
    * Atualiza último bloco processado
    */
-  private async updateLastBlock(blockNumber: bigint) {
-    await this.prisma.indexerState.update({
-      where: { id: 'singleton' },
-      data: { lastBlockProcessed: blockNumber },
-    });
+  private updateLastBlock(blockNumber: bigint) {
+    this.lastBlockProcessed = blockNumber;
   }
 
   /**
    * Sincronização manual (útil para testes/admin)
    */
   async manualSync() {
-    this.logger.log('Sincronização manual iniciada');
+    this.logger.log("Sincronização manual iniciada");
     await this.processNewBlocks();
-    return { success: true, message: 'Sincronização concluída' };
+    return { success: true, message: "Sincronização concluída" };
   }
 
   /**
    * Retorna estado atual do indexador
    */
-  async getState() {
+  getState() {
     return this.getOrCreateIndexerState();
   }
 
   /**
    * Reset do indexador (APENAS DESENVOLVIMENTO)
    */
-  async reset(startBlock: bigint = BigInt(0)) {
+  reset(startBlock: bigint = BigInt(0)) {
     this.logger.warn(`⚠️  Resetando indexador para bloco ${startBlock}`);
-    await this.prisma.indexerState.update({
-      where: { id: 'singleton' },
-      data: { lastBlockProcessed: startBlock },
-    });
+    this.lastBlockProcessed = startBlock;
     return { success: true, resetTo: startBlock };
   }
 }

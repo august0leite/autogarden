@@ -1,6 +1,6 @@
 /**
  * ABI do contrato de música (apenas eventos relevantes para indexação)
- * 
+ *
  * Evento WorkRegistered é emitido quando uma obra é registrada on-chain
  */
 export const MUSIC_CONTRACT_ABI = [
@@ -9,31 +9,31 @@ export const MUSIC_CONTRACT_ABI = [
     inputs: [
       {
         indexed: true,
-        internalType: 'uint256',
-        name: 'workId',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "workId",
+        type: "uint256",
       },
       {
         indexed: true,
-        internalType: 'address',
-        name: 'creator',
-        type: 'address',
+        internalType: "address",
+        name: "creator",
+        type: "address",
       },
       {
         indexed: false,
-        internalType: 'string',
-        name: 'title',
-        type: 'string',
+        internalType: "string",
+        name: "title",
+        type: "string",
       },
       {
         indexed: false,
-        internalType: 'string',
-        name: 'metadataHash',
-        type: 'string',
+        internalType: "string",
+        name: "metadataHash",
+        type: "string",
       },
     ],
-    name: 'WorkRegistered',
-    type: 'event',
+    name: "WorkRegistered",
+    type: "event",
   },
   // Adicionar outros eventos conforme necessário
   // ex: WorkStateChanged, SplitUpdated, etc.

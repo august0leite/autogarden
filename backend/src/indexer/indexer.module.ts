@@ -1,17 +1,9 @@
-import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
-import { IndexerService } from './indexer.service';
-import { IndexerController } from './indexer.controller';
-import { PrismaModule } from '../database/prisma.module';
-import { TracksModule } from '../tracks/tracks.module';
+import { Module } from "@nestjs/common";
+import { ScheduleModule } from "@nestjs/schedule";
+import { IndexerService } from "./indexer.service";
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    PrismaModule,
-    TracksModule,
-  ],
-  controllers: [IndexerController],
+  imports: [ScheduleModule.forRoot()],
   providers: [IndexerService],
   exports: [IndexerService],
 })

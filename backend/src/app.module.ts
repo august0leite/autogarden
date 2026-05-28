@@ -7,8 +7,10 @@ import { APP_GUARD } from "@nestjs/core";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
-import { TracksModule } from "./tracks/tracks.module";
-import { IndexerModule } from "./indexer/indexer.module";
+import { CultivationsModule } from "./cultivations/cultivations.module";
+import { DevicesModule } from "./devices/devices.module";
+import { ReadingsModule } from "./readings/readings.module";
+import { ActionsModule } from "./actions/actions.module";
 
 @Module({
   imports: [
@@ -20,8 +22,10 @@ import { IndexerModule } from "./indexer/indexer.module";
     HealthModule,
     AuthModule,
     UsersModule,
-    TracksModule,
-    IndexerModule,
+    CultivationsModule,
+    DevicesModule,
+    ReadingsModule,
+    ActionsModule,
   ],
   providers: [
     {

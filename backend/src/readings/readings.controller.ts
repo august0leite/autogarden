@@ -1,0 +1,196 @@
+import {
+  BadRequestException,
+  Controller,
+  ForbiddenException,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from "@nestjs/swagger";
+import { ReadingsService } from "./readings.service";
+import { ActionsService } from "../actions/actions.service";
+import { DevicesService } from "../devices/devices.service";
+import {
+  CreateReadingDto,
+  ReadingResponseDto,
+  DecisionResponseDto,
+  DecisionHistoryDto,
+} from "./dto";
+import {
+  CreateActionDto,
+  ActionScheduledDto,
+  ActionResponseDto,
+} from "../actions/dto";
+import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { CurrentDevice } from "../devices/decorators/current-device.decorator";
+import { Public } from "../auth/decorators/public.decorator";
+import { DeviceAuthGuard } from "../devices/guards/device-auth.guard";
+
+@ApiTags("devices")
+@Controller("v1/devices")
+export class ReadingsController {
+  constructor(
+    private readonly readingsService: ReadingsService,
+    private readonly actionsService: ActionsService,
+    private readonly devicesService: DevicesService,
+  ) {}
+
+  // ========== ENDPOINTS DE DISPOSITIVO (usa token) ==========
+
+  @Post(":deviceId/readings")
+  @Public()
+  @UseGuards(DeviceAuthGuard)
+  @ApiOperation({ summary: "Enviar leitura do sensor (dispositivo)" })
+  @ApiResponse({ status: 201, type: DecisionResponseDto })
+  async createReading(
+    @Param("deviceId") deviceId: string,
+    @CurrentDevice("id") deviceIdFromToken: string,
+    @Body() createDto: CreateReadingDto,
+  ) {
+    // Verificar se deviceId do parâmetro corresponde ao token
+    if (deviceId !== deviceIdFromToken) {
+      throw new ForbiddenException("DEVICE_ID_MISMATCH");
+    }
+    return this.readingsService.createReading(deviceId, createDto);
+  }
+
+  @Get(":deviceId/ping")
+  @Public()
+  @UseGuards(DeviceAuthGuard)
+  @ApiOperation({ summary: "Healthcheck do dispositivo" })
+  @ApiResponse({
+    status: 200,
+    schema: { properties: { status: { type: "string", enum: ["online"] } } },
+  })
+  async ping(
+    @Param("deviceId") deviceId: string,
+    @CurrentDevice("id") deviceIdFromToken: string,
+  ) {
+    if (deviceId !== deviceIdFromToken) {
+      throw new ForbiddenException("DEVICE_ID_MISMATCH");
+    }
+    await this.devicesService.updatePing(deviceId);
+    return { status: "online" };
+  }
+
+  // ========== ENDPOINTS DE USUÁRIO ==========
+
+  @Get(":deviceId/readings")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Histórico de leituras" })
+  @ApiQuery({ name: "from", required: false, type: String })
+  @ApiQuery({ name: "to", required: false, type: String })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiResponse({ status: 200, type: [ReadingResponseDto] })
+  async getReadings(
+    @Param("deviceId") deviceId: string,
+    @CurrentUser("userId") userId: string,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+    @Query("limit") limit?: string,
+  ) {
+    // Validar que dispositivo pertence ao usuário
+    await this.devicesService.findOne(deviceId, userId);
+
+    const parsedFrom = this.parseDateParam("from", from);
+    const parsedTo = this.parseDateParam("to", to);
+    const parsedLimit = this.parseLimitParam(limit);
+
+    return this.readingsService.findAllByDevice(deviceId, {
+      from: parsedFrom,
+      to: parsedTo,
+      limit: parsedLimit,
+    });
+  }
+
+  @Get(":deviceId/decisions")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Histórico de decisões" })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiResponse({ status: 200, type: [DecisionHistoryDto] })
+  async getDecisions(
+    @Param("deviceId") deviceId: string,
+    @CurrentUser("userId") userId: string,
+    @Query("limit") limit?: string,
+  ) {
+    // Validar que dispositivo pertence ao usuário
+    await this.devicesService.findOne(deviceId, userId);
+
+    return this.readingsService.findDecisionsByDevice(
+      deviceId,
+      this.parseLimitParam(limit),
+    );
+  }
+
+  @Get(":deviceId/actions")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Histórico de ações" })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiResponse({ status: 200, type: [ActionResponseDto] })
+  async getActions(
+    @Param("deviceId") deviceId: string,
+    @CurrentUser("userId") userId: string,
+    @Query("limit") limit?: string,
+  ) {
+    // Validar que dispositivo pertence ao usuário
+    await this.devicesService.findOne(deviceId, userId);
+
+    return this.actionsService.findAllByDevice(
+      deviceId,
+      this.parseLimitParam(limit),
+    );
+  }
+
+  @Post(":deviceId/actions")
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Criar ação manual" })
+  @ApiResponse({ status: 201, type: ActionScheduledDto })
+  async createManualAction(
+    @Param("deviceId") deviceId: string,
+    @CurrentUser("userId") userId: string,
+    @Body() createDto: CreateActionDto,
+  ) {
+    // Validar que dispositivo pertence ao usuário
+    await this.devicesService.findOne(deviceId, userId);
+
+    return this.actionsService.createManualAction(deviceId, createDto);
+  }
+
+  private parseDateParam(
+    param: "from" | "to",
+    value?: string,
+  ): Date | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException(`INVALID_${param.toUpperCase()}_DATE`);
+    }
+
+    return date;
+  }
+
+  private parseLimitParam(value?: string): number | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed)) {
+      throw new BadRequestException("INVALID_LIMIT");
+    }
+
+    return Math.min(Math.max(parsed, 1), 100);
+  }
+}
