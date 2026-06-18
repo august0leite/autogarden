@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Wallet } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "./button";
 import { AuthLayout } from "./auth-layout";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function SignUpCard() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -21,22 +23,22 @@ export function SignUpCard() {
     setError(null);
 
     if (!email) {
-      setError("Email is required");
+      setError(t.auth.errorEmailRequired);
       return;
     }
 
     if (!password) {
-      setError("Password is required");
+      setError(t.auth.errorPasswordRequired);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t.auth.errorPasswordsNoMatch);
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t.auth.errorPasswordTooShort);
       return;
     }
 
@@ -58,7 +60,7 @@ export function SignUpCard() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="mb-6"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">Create account</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{t.auth.signUpTitle}</h1>
         </motion.div>
 
         <form onSubmit={handleSignUp} className="space-y-4">
@@ -69,18 +71,18 @@ export function SignUpCard() {
             transition={{ duration: 0.4, delay: 0.15 }}
           >
             <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-              Email address
+              {t.auth.emailLabel}
             </label>
             <input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.emailPlaceholder}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 if (error?.includes("Email")) setError(null);
               }}
-              className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 ${
+              className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 ${
                 error?.includes("Email") ? "border-red-500/50 focus:ring-red-500" : "border-border hover:border-border/80"
               }`}
             />
@@ -93,19 +95,19 @@ export function SignUpCard() {
             transition={{ duration: 0.4, delay: 0.2 }}
           >
             <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-              Password
+              {t.auth.passwordLabel}
             </label>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (error?.includes("Password")) setError(null);
                 }}
-                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 ${
+                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 ${
                   error?.includes("Password") ? "border-red-500/50 focus:ring-red-500" : "border-border hover:border-border/80"
                 }`}
               />
@@ -122,7 +124,7 @@ export function SignUpCard() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray mt-1">At least 8 characters</p>
+            <p className="text-xs text-gray mt-1">{t.auth.passwordHint}</p>
           </motion.div>
 
           {/* Confirm Password Input */}
@@ -132,19 +134,19 @@ export function SignUpCard() {
             transition={{ duration: 0.4, delay: 0.25 }}
           >
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
-              Confirm password
+              {t.auth.confirmPasswordLabel}
             </label>
             <div className="relative">
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
                   if (error?.includes("match")) setError(null);
                 }}
-                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 ${
+                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 ${
                   error?.includes("match") ? "border-red-500/50 focus:ring-red-500" : "border-border hover:border-border/80"
                 }`}
               />
@@ -198,54 +200,13 @@ export function SignUpCard() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-5 h-5 border-2 border-transparent border-t-white rounded-full"
                   />
-                  Creating account...
+                  {t.auth.creatingAccount}
                 </>
               ) : (
-                "Create account"
+                t.auth.signUpButton
               )}
             </Button>
           </motion.div>
-
-          {/* Divider */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.35 }}
-            className="relative py-4"
-          >
-            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-            <div className="relative flex justify-center">
-              <span className="px-3 bg-indigo/50 text-gray text-sm">or continue with</span>
-            </div>
-          </motion.div>
-
-          {/* Wallet Sign Up */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-          >
-            <Button
-              type="button"
-              variant="secondary"
-              size="lg"
-              className="w-full"
-              onClick={() => console.log("Wallet sign up")}
-            >
-              <Wallet className="w-5 h-5" />
-              Sign up with wallet
-            </Button>
-          </motion.div>
-
-          {/* Wallet microcopy */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.45 }}
-            className="text-center text-gray text-xs leading-relaxed"
-          >
-            No transaction or fees required
-          </motion.p>
         </form>
 
         {/* Footer links */}
@@ -255,12 +216,12 @@ export function SignUpCard() {
           transition={{ duration: 0.4, delay: 0.5 }}
           className="mt-6 pt-6 border-t border-border/50 text-center text-sm text-gray"
         >
-          Already have an account?{" "}
+          {t.auth.hasAccount}{" "}
           <Link 
             href="/signin"
-            className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
+            className="text-emerald hover:text-emerald/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
           >
-            Sign in
+            {t.auth.signInButton}
           </Link>
         </motion.div>
 
@@ -276,9 +237,9 @@ export function SignUpCard() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 border-3 border-transparent border-t-violet rounded-full"
+                className="w-8 h-8 border-3 border-transparent border-t-emerald rounded-full"
               />
-              <span className="text-sm text-gray">Creating your account...</span>
+              <span className="text-sm text-gray">{t.auth.creatingYourAccount}</span>
             </div>
           </motion.div>
         )}

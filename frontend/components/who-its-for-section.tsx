@@ -1,29 +1,32 @@
 "use client";
 
-import { Mic, Headphones, Users2, Building2 } from "lucide-react";
+import { Home, Sprout, Microscope, Cpu } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function WhoItsForSection() {
+  const { t } = useTranslation();
+  
   const audiences = [
     {
-      icon: Mic,
-      title: "Independent artists",
-      description: "Solo musicians who want clear proof of authorship for their original works."
+      icon: Home,
+      title: t.who.stage1Title,
+      description: t.who.stage1Description
     },
     {
-      icon: Headphones,
-      title: "Producers",
-      description: "Beatmakers and producers collaborating with multiple artists on different projects."
+      icon: Sprout,
+      title: t.who.stage2Title,
+      description: t.who.stage2Description
     },
     {
-      icon: Users2,
-      title: "Collectives",
-      description: "Music groups and creative teams who need transparent split agreements."
+      icon: Microscope,
+      title: t.who.stage3Title,
+      description: t.who.stage3Description
     },
     {
-      icon: Building2,
-      title: "Labels (coming soon)",
-      description: "Independent labels managing catalogs with clear ownership documentation."
+      icon: Cpu,
+      title: t.who.stage4Title,
+      description: t.who.stage4Description
     }
   ];
 
@@ -38,10 +41,10 @@ export function WhoItsForSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Who is this for?
+            {t.who.title}
           </h2>
           <p className="text-lg text-gray max-w-2xl mx-auto">
-            Audiofy is designed for creators who value transparency, independence, and long-term protection of their work.
+            {t.who.subtitle}
           </p>
         </motion.div>
 
@@ -49,14 +52,14 @@ export function WhoItsForSection() {
           {audiences.map((audience, index) => (
             <motion.div
               key={index}
-              className="bg-indigo/10 border border-border rounded-2xl p-6 hover:bg-indigo/20 hover:border-white/20 text-center flex flex-col"
+              className="bg-indigo/10 border border-border rounded-2xl p-6 hover:bg-indigo/20 hover:border-emerald/30 text-center flex flex-col"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="w-16 h-16 rounded-full bg-violet/10 flex items-center justify-center mx-auto mb-4">
-                <audience.icon className="w-8 h-8 text-violet" />
+              <div className="w-16 h-16 rounded-full bg-emerald/10 flex items-center justify-center mx-auto mb-4">
+                <audience.icon className="w-8 h-8 text-emerald" />
               </div>
               <h3 className="text-lg font-semibold mb-2">{audience.title}</h3>
               <p className="text-gray text-sm leading-relaxed">{audience.description}</p>

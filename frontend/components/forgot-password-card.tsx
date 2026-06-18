@@ -5,8 +5,10 @@ import { ArrowLeft, Mail, ArrowRight } from "lucide-react";
 import { Button } from "./button";
 import { AuthLayout } from "./auth-layout";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function ForgotPasswordCard() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,13 +49,13 @@ export function ForgotPasswordCard() {
               </motion.div>
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2">Check your email</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">{t.auth.checkEmailTitle}</h1>
             <p className="text-gray text-sm leading-relaxed mb-6">
-              We've sent a password reset link to{" "}
+              {t.auth.checkEmailMessage}{" "}
               <span className="text-white font-medium">{email}</span>
             </p>
             <p className="text-gray text-xs">
-              It may take a minute to arrive. Check your spam folder if you don't see it.
+              {t.auth.checkEmailHint}
             </p>
           </motion.div>
 
@@ -75,7 +77,7 @@ export function ForgotPasswordCard() {
               }}
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to sign in
+              {t.auth.backToSignIn}
             </Button>
           </motion.div>
         </div>
@@ -93,9 +95,9 @@ export function ForgotPasswordCard() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">Reset your password</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{t.auth.forgotPasswordTitle}</h1>
           <p className="text-gray text-sm">
-            Enter your email and we'll send you a link to reset your password.
+            {t.auth.forgotPasswordSubtitle}
           </p>
         </motion.div>
 
@@ -107,12 +109,12 @@ export function ForgotPasswordCard() {
             transition={{ duration: 0.4, delay: 0.15 }}
           >
             <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-              Email address
+              {t.auth.emailLabel}
             </label>
             <input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -140,11 +142,11 @@ export function ForgotPasswordCard() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-5 h-5 border-2 border-transparent border-t-white rounded-full"
                   />
-                  Sending...
+                  {t.auth.sending}
                 </>
               ) : (
                 <>
-                  Send reset link
+                  {t.auth.sendResetLink}
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -165,16 +167,16 @@ export function ForgotPasswordCard() {
               className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-2 py-1 inline-flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to sign in
+              {t.auth.backToSignIn}
             </button>
           </div>
           <div>
-            Don't have an account?{" "}
+            {t.auth.noAccount}{" "}
             <button
               type="button"
               className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
             >
-              Create one
+              {t.auth.createAccount}
             </button>
           </div>
         </motion.div>

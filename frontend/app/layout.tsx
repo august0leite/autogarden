@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Audiofy - Music Authorship, Recorded Forever",
-  description: "Register your music with transparent ownership and royalty splits — no intermediaries, no ambiguity.",
+  title: "Sprout — O sistema operacional para o seu cultivo",
+  description: "Acompanhe, aprenda e automatize. Organize seu cultivo em um único lugar e conecte sensores quando estiver pronto para evoluir.",
 };
 
 export default function RootLayout({
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

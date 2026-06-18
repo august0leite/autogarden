@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign In - Audiofy",
-  description: "Sign in to your Audiofy account to manage your music registry.",
+  title: "Sign In - Sprout",
+  description: "Sign in to your Sprout account to manage your cultivation automation.",
 };
 
 export default function SignInLayout({

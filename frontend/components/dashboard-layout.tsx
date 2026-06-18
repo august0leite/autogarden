@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { 
-  Music, 
+  Sprout, 
   Plus, 
-  User, 
+  User,
   LogOut, 
   Menu, 
   X,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/language-selector";
 
 type NavItem = "works" | "create" | "profile";
 
@@ -18,15 +20,17 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   activeNav: NavItem;
   onNavChange: (nav: NavItem) => void;
+  topBarAction?: React.ReactNode;
 }
 
-export function DashboardLayout({ children, activeNav, onNavChange }: DashboardLayoutProps) {
+export function DashboardLayout({ children, activeNav, onNavChange, topBarAction }: DashboardLayoutProps) {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navItems: Array<{ id: NavItem; label: string; icon: React.ReactNode; badge?: string }> = [
-    { id: "works", label: "My Works", icon: <Music className="w-5 h-5" /> },
-    { id: "create", label: "Create Work", icon: <Plus className="w-5 h-5" /> },
-    { id: "profile", label: "Profile", icon: <User className="w-5 h-5" /> },
+    { id: "works", label: t.dashboard.myGrows, icon: <Sprout className="w-5 h-5" /> },
+    { id: "create", label: t.dashboard.newGrow, icon: <Plus className="w-5 h-5" /> },
+    { id: "profile", label: t.dashboard.profile, icon: <User className="w-5 h-5" /> },
   ];
 
   return (
@@ -43,11 +47,11 @@ export function DashboardLayout({ children, activeNav, onNavChange }: DashboardL
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-violet flex items-center justify-center flex-shrink-0">
-              <Music className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-emerald flex items-center justify-center flex-shrink-0">
+              <Sprout className="w-6 h-6 text-white" />
             </div>
             {sidebarOpen && (
-              <span className="text-lg font-bold text-white">Audiofy</span>
+              <span className="text-lg font-bold text-white">Sprout</span>
             )}
           </Link>
         </div>
@@ -60,7 +64,7 @@ export function DashboardLayout({ children, activeNav, onNavChange }: DashboardL
               onClick={() => onNavChange(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                 activeNav === item.id
-                  ? "bg-violet text-white"
+                  ? "bg-emerald text-white"
                   : "text-gray hover:bg-indigo/50 hover:text-white"
               }`}
             >
@@ -81,7 +85,7 @@ export function DashboardLayout({ children, activeNav, onNavChange }: DashboardL
         <div className="p-4 border-t border-border space-y-2">
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray hover:bg-indigo/50 hover:text-white transition-all">
             <LogOut className="w-5 h-5" />
-            {sidebarOpen && <span className="text-sm font-medium">Sign out</span>}
+            {sidebarOpen && <span className="text-sm font-medium">{t.dashboard.signOut}</span>}
           </button>
         </div>
 
@@ -113,20 +117,12 @@ export function DashboardLayout({ children, activeNav, onNavChange }: DashboardL
       {/* Main content */}
       <main className="flex-1 overflow-auto">
         {/* Top bar */}
-        <div className="border-b border-border bg-midnight/50 backdrop-blur px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-violet/20 border border-violet/30 flex items-center justify-center">
-              <User className="w-5 h-5 text-violet" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">Welcome back, Artist</p>
-              <p className="text-xs text-gray">Manage your music works</p>
-            </div>
-          </div>
+        <div className="w-full flex justify-end items-center gap-2 px-6 md:px-8 py-4">
+          {topBarAction}
+          <LanguageSelector />
         </div>
-
         {/* Content */}
-        <div className="p-6 md:p-8">
+        <div className="px-6 md:px-8 pb-6 md:pb-8">
           {children}
         </div>
       </main>

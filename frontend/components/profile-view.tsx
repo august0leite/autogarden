@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Link as LinkIcon, LogOut } from "lucide-react";
+import { User, Mail, LogOut } from "lucide-react";
 import { Button } from "./button";
 import { motion } from "motion/react";
 
@@ -11,9 +11,7 @@ interface ProfileViewProps {
 
 export function ProfileView({ onSignOut }: ProfileViewProps) {
   const [name, setName] = useState("Alex Johnson");
-  const [email] = useState("alex@audiofy.io");
-  const [walletConnected] = useState(true);
-  const [walletAddress] = useState("0x742d...8e88");
+  const [email] = useState("alex@sprout.ag");
 
   return (
     <motion.div
@@ -30,8 +28,7 @@ export function ProfileView({ onSignOut }: ProfileViewProps) {
           </div>
 
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold text-white mb-2">{name}</h2>
-            <p className="text-gray mb-4">Music creator and artist</p>
+            <h2 className="text-2xl font-semibold text-white mb-6">{name}</h2>
 
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2 text-gray">
@@ -57,7 +54,7 @@ export function ProfileView({ onSignOut }: ProfileViewProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-midnight/50 border border-border text-white focus:outline-none focus:ring-2 focus:ring-violet"
+              className="w-full px-4 py-2 rounded-lg bg-midnight/50 border border-border text-white focus:outline-none focus:ring-2 focus:ring-emerald"
             />
           </div>
 
@@ -84,87 +81,38 @@ export function ProfileView({ onSignOut }: ProfileViewProps) {
           </div>
         </div>
 
-        {/* Wallet Connection */}
+        {/* Device Settings */}
         <div className="bg-indigo/30 border border-border rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-white">Wallet</h3>
+          <h3 className="text-lg font-semibold text-white">Connected devices</h3>
 
           <div className="bg-midnight/30 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <div
-                className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                  walletConnected ? "bg-green-500" : "bg-yellow-500"
-                }`}
-              />
-              <span className="text-sm font-medium text-white">
-                {walletConnected ? "Connected" : "Disconnected"}
-              </span>
+              <div className="w-3 h-3 rounded-full flex-shrink-0 bg-green-500" />
+              <span className="text-sm font-medium text-white">3 devices online</span>
             </div>
 
-            {walletConnected && (
-              <div className="flex items-center gap-2 p-3 bg-violet/10 rounded-lg border border-violet/20">
-                <LinkIcon className="w-4 h-4 text-violet flex-shrink-0" />
-                <span className="text-sm font-mono text-white">{walletAddress}</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-emerald/10 rounded border border-emerald/20">
+                <span className="text-sm text-white">Soil Sensor #1</span>
+                <span className="text-xs text-gray">Active</span>
               </div>
-            )}
+              <div className="flex items-center justify-between p-2 bg-emerald/10 rounded border border-emerald/20">
+                <span className="text-sm text-white">Temperature Controller</span>
+                <span className="text-xs text-gray">Active</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-emerald/10 rounded border border-emerald/20">
+                <span className="text-sm text-white">Irrigation System</span>
+                <span className="text-xs text-gray">Active</span>
+              </div>
+            </div>
 
             <p className="text-xs text-gray">
-              {walletConnected
-                ? "Your wallet is connected and ready for on-chain transactions"
-                : "Connect a wallet to register works on-chain"}
+              All devices are connected and monitoring your cultivation environment
             </p>
           </div>
 
           <Button variant="secondary" size="lg" className="w-full">
-            {walletConnected ? "Disconnect wallet" : "Connect wallet"}
-          </Button>
-        </div>
-      </div>
-
-      {/* Preferences */}
-      <div className="bg-indigo/30 border border-border rounded-lg p-6 mt-6 space-y-4">
-        <h3 className="text-lg font-semibold text-white">Preferences</h3>
-
-        <div className="space-y-3">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" defaultChecked className="w-4 h-4" />
-            <span className="text-sm text-white">
-              Email me when someone registers a collaboration with my work
-            </span>
-          </label>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" defaultChecked className="w-4 h-4" />
-            <span className="text-sm text-white">
-              Notify me about new royalties distributions
-            </span>
-          </label>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" className="w-4 h-4" />
-            <span className="text-sm text-white">
-              Include my profile in the Audiofy creator directory
-            </span>
-          </label>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 mt-6 space-y-4">
-        <h3 className="text-lg font-semibold text-red-400">Danger zone</h3>
-
-        <div className="space-y-3">
-          <Button variant="secondary" size="lg" className="w-full">
-            Request data export
-          </Button>
-
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full bg-red-500 hover:bg-red-600 text-white"
-            onClick={onSignOut}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign out
+            Manage devices
           </Button>
         </div>
       </div>

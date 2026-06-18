@@ -54,10 +54,10 @@ export function MyWorksView({ onCreateWork }: MyWorksViewProps) {
 
         {/* Content */}
         <h2 className="text-3xl font-bold text-white mb-3 text-center">
-          No music works registered yet.
+          No cultivation records yet.
         </h2>
         <p className="text-gray text-center mb-8 max-w-md">
-          Create your first work to establish authorship and ownership records.
+          Create your first grow to start tracking environmental data and device activity.
         </p>
 
         {/* CTA */}

@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Wallet } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "./button";
 import { AuthLayout } from "./auth-layout";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function SignInCard() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,12 +21,12 @@ export function SignInCard() {
     setError(null);
 
     if (!email) {
-      setError("Email is required");
+      setError(t.auth.errorEmailRequired);
       return;
     }
 
     if (!password) {
-      setError("Password is required");
+      setError(t.auth.errorPasswordRequired);
       return;
     }
 
@@ -47,9 +49,9 @@ export function SignInCard() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="mb-6"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">Sign in to Audiofy</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{t.auth.signInTitle}</h1>
           <p className="text-gray text-sm">
-            Access your music registry and manage your works.
+            {t.auth.signInSubtitle}
           </p>
         </motion.div>
 
@@ -61,18 +63,18 @@ export function SignInCard() {
             transition={{ duration: 0.4, delay: 0.15 }}
           >
             <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-              Email address
+              {t.auth.emailLabel}
             </label>
             <input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.emailPlaceholder}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (error === "Email is required") setError(null);
+                if (error === t.auth.errorEmailRequired) setError(null);
               }}
-              className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 ${
+              className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 ${
                 error ? "border-red-500/50 focus:ring-red-500" : "border-border hover:border-border/80"
               }`}
             />
@@ -85,19 +87,19 @@ export function SignInCard() {
             transition={{ duration: 0.4, delay: 0.2 }}
           >
             <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-              Password
+              {t.auth.passwordLabel}
             </label>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (error === "Password is required") setError(null);
+                  if (error === t.auth.errorPasswordRequired) setError(null);
                 }}
-                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 ${
+                className={`w-full px-4 py-3 rounded-lg bg-midnight/50 border transition-all duration-200 font-medium placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 ${
                   error ? "border-red-500/50 focus:ring-red-500" : "border-border hover:border-border/80"
                 }`}
               />
@@ -151,54 +153,13 @@ export function SignInCard() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-5 h-5 border-2 border-transparent border-t-white rounded-full"
                   />
-                  Signing in...
+                  {t.auth.signingIn}
                 </>
               ) : (
-                "Sign in"
+                t.auth.signInButton
               )}
             </Button>
           </motion.div>
-
-          {/* Divider */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="relative py-4"
-          >
-            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-            <div className="relative flex justify-center">
-              <span className="px-3 bg-indigo/50 text-gray text-sm">or continue with</span>
-            </div>
-          </motion.div>
-
-          {/* Wallet Sign In */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.35 }}
-          >
-            <Button
-              type="button"
-              variant="secondary"
-              size="lg"
-              className="w-full"
-              onClick={() => console.log("Wallet sign in")}
-            >
-              <Wallet className="w-5 h-5" />
-              Sign in with wallet
-            </Button>
-          </motion.div>
-
-          {/* Wallet microcopy */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-            className="text-center text-gray text-xs leading-relaxed"
-          >
-            No transaction or fees required
-          </motion.p>
         </form>
 
         {/* Footer links */}
@@ -211,18 +172,18 @@ export function SignInCard() {
           <div className="text-center">
             <button
               type="button"
-              className="text-sm text-gray hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-2 py-1"
+              className="text-sm text-gray hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-2 py-1"
             >
-              Forgot your password?
+              {t.auth.forgotPassword}
             </button>
           </div>
           <div className="text-center text-sm text-gray">
-            Don&#39;t have an account?{" "}
+            {t.auth.noAccount}{" "}
             <Link 
               href="/signup"
-              className="text-violet hover:text-violet/80 transition-colors focus:outline-none focus:ring-2 focus:ring-violet focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
+              className="text-emerald hover:text-emerald/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald focus:ring-offset-2 focus:ring-offset-indigo/50 rounded px-1 font-medium"
             >
-              Create one
+              {t.auth.createAccount}
             </Link>
           </div>
         </motion.div>
@@ -239,7 +200,7 @@ export function SignInCard() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 border-3 border-transparent border-t-violet rounded-full"
+                className="w-8 h-8 border-3 border-transparent border-t-emerald rounded-full"
               />
               <span className="text-sm text-gray">Verifying credentials...</span>
             </div>

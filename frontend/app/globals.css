@@ -1,23 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Audiofy Color Palette */
-  --color-midnight: #0F1117;
-  --color-indigo: #1C1E2D;
-  --color-violet: #6B5CFF;
-  --color-white: #FFFFFF;
-  --color-gray: #9CA3AF;
-  --color-border: rgba(255, 255, 255, 0.08);
+  /* Sprout Color Palette */
+  --color-midnight: #0F1115;
+  --color-indigo: #1A2332;
+  --color-violet: #1F6B4F;
+  --color-white: #F8FAFC;
+  --color-gray: #94A3B8;
+  --color-border: rgba(31, 107, 79, 0.15);
+  --color-emerald: #1F6B4F;
+  --color-lime: #B8E986;
+  --color-forest: #1F6B4F;
+  --color-soft-green: #6ECF8E;
 }
 
 @theme {
   /* Colors */
   --color-midnight: var(--color-midnight);
   --color-indigo: var(--color-indigo);
-  --color-violet: var(--color-violet);
+  --color-violet: var(--color-emerald);
   --color-white: var(--color-white);
   --color-gray: var(--color-gray);
   --color-border: var(--color-border);
+  --color-emerald: var(--color-emerald);
+  --color-lime: var(--color-lime);
+  --color-forest: var(--color-forest);
+  --color-soft-green: var(--color-soft-green);
   
   /* Font families */
   --font-sans: var(--font-geist-sans);

@@ -83,7 +83,7 @@ export function CreateWorkView({ onCancel }: CreateWorkViewProps) {
             <input
               id="title"
               type="text"
-              placeholder="Song title, album name, etc."
+              placeholder="Grow name, strain, location, etc."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2 rounded-lg bg-midnight/50 border border-border text-white placeholder:text-gray/50 focus:outline-none focus:ring-2 focus:ring-violet"

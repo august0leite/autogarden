@@ -1,29 +1,32 @@
 "use client";
 
-import { AlertCircle, FileQuestion, Users, FileText } from "lucide-react";
+import { Clock, Database, Thermometer, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function ProblemSection() {
+  const { t } = useTranslation();
+  
   const problems = [
     {
-      icon: FileQuestion,
-      title: "Authorship disputes",
-      description: "Disagreements over who created what, with no clear proof of contribution."
+      icon: Clock,
+      title: t.problem.card1Title,
+      description: t.problem.card1Description
     },
     {
-      icon: FileText,
-      title: "Lack of clear records",
-      description: "Manual contracts and agreements that can be lost, disputed, or ignored."
+      icon: Thermometer,
+      title: t.problem.card2Title,
+      description: t.problem.card2Description
     },
     {
-      icon: Users,
-      title: "Trust-based agreements",
-      description: "Relying on verbal promises or informal splits that become unclear over time."
+      icon: Database,
+      title: t.problem.card3Title,
+      description: t.problem.card3Description
     },
     {
-      icon: AlertCircle,
-      title: "No verification",
-      description: "No public way to verify ownership percentages or authorship claims."
+      icon: AlertTriangle,
+      title: t.problem.card4Title,
+      description: t.problem.card4Description
     }
   ];
 
@@ -38,10 +41,10 @@ export function ProblemSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            The problem with music ownership
+            {t.problem.title}
           </h2>
           <p className="text-lg text-gray max-w-2xl mx-auto">
-            Traditional music registration creates confusion, disputes, and lost opportunities for independent creators.
+            {t.problem.subtitle}
           </p>
         </motion.div>
 
@@ -49,14 +52,14 @@ export function ProblemSection() {
           {problems.map((problem, index) => (
             <motion.div 
               key={index}
-              className="bg-indigo/50 border border-border rounded-2xl p-8 hover:border-white/20 flex flex-col"
+              className="bg-indigo/50 border border-border rounded-2xl p-8 hover:border-emerald/30 flex flex-col"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
               <div className="flex items-center gap-3 mb-3">
-                <problem.icon className="w-10 h-10 text-violet flex-shrink-0" />
+                <problem.icon className="w-10 h-10 text-emerald flex-shrink-0" />
                 <h3 className="text-xl font-semibold">{problem.title}</h3>
               </div>
               <p className="text-gray leading-relaxed">{problem.description}</p>

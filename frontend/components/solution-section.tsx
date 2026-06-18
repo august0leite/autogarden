@@ -1,27 +1,30 @@
 "use client";
 
-import { Music, UserPlus, CheckCircle } from "lucide-react";
+import { Wifi, Activity, CheckCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function SolutionSection() {
+  const { t } = useTranslation();
+  
   const steps = [
     {
       number: "01",
-      icon: Music,
-      title: "Create a music work",
-      description: "Add your song details, including title, contributors, and creation date."
+      icon: Wifi,
+      title: t.solution.step1Title,
+      description: t.solution.step1Description
     },
     {
       number: "02",
-      icon: UserPlus,
-      title: "Define authors and splits",
-      description: "List all contributors with their roles and ownership percentages. Everything is clear upfront."
+      icon: Activity,
+      title: t.solution.step2Title,
+      description: t.solution.step2Description
     },
     {
       number: "03",
       icon: CheckCircle,
-      title: "Register it permanently",
-      description: "Create a public, permanent record that anyone can verify. No single entity controls it."
+      title: t.solution.step3Title,
+      description: t.solution.step3Description
     }
   ];
 
@@ -36,10 +39,10 @@ export function SolutionSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            How Audiofy works
+            {t.solution.title}
           </h2>
           <p className="text-lg text-gray max-w-2xl mx-auto mb-6">
-            Register your music in three simple steps. The process is straightforward and transparent.
+            {t.solution.subtitle}
           </p>
         </motion.div>
 
@@ -53,12 +56,12 @@ export function SolutionSection() {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              <div className="relative bg-indigo/20 border border-border rounded-2xl p-8 hover:border-violet/50 min-h-[280px] flex flex-col">
+              <div className="relative bg-indigo/20 border border-border rounded-2xl p-8 hover:border-emerald/50 min-h-[280px] flex flex-col">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="text-6xl font-bold text-violet/20">
+                  <div className="text-6xl font-bold text-emerald/20">
                     {step.number}
                   </div>
-                  <step.icon className="w-12 h-12 text-violet flex-shrink-0" />
+                  <step.icon className="w-12 h-12 text-emerald flex-shrink-0" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
                 <p className="text-gray leading-relaxed">{step.description}</p>

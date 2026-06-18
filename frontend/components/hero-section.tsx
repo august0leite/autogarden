@@ -4,8 +4,11 @@ import Link from "next/link";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Button } from "./button";
 import { motion } from "motion/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function HeroSection() {
+  const { t } = useTranslation();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Abstract grid background */}
@@ -19,12 +22,12 @@ export function HeroSection() {
         }} />
         
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald/5 via-transparent to-transparent" />
         
-        {/* Connected nodes effect - subtle circles */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-violet/30 blur-sm" />
-        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full bg-violet/20 blur-sm" />
-        <div className="absolute bottom-1/3 left-1/2 w-2 h-2 rounded-full bg-violet/25 blur-sm" />
+        {/* Connected nodes effect - subtle circles with organic glow */}
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-emerald/30 blur-sm" />
+        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full bg-lime/20 blur-sm" />
+        <div className="absolute bottom-1/3 left-1/2 w-2 h-2 rounded-full bg-emerald/25 blur-sm" />
       </div>
 
       {/* Content */}
@@ -36,21 +39,19 @@ export function HeroSection() {
       >
         {/* Logo/Product name */}
         <div className="mb-8">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-white via-white to-gray bg-clip-text text-transparent">
-            Audiofy
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-lime via-emerald to-white bg-clip-text text-transparent">
+            Sprout
           </h1>
         </div>
 
         {/* Headline */}
         <h2 className="text-4xl md:text-6xl font-bold leading-tight mb-6 tracking-tight">
-          Music authorship,
-          <br />
-          <span className="text-gray">recorded forever.</span>
+          {t.hero.title}
         </h2>
 
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-gray max-w-2xl mx-auto mb-12 leading-relaxed">
-          Register your music with transparent ownership and royalty splits — no intermediaries, no ambiguity.
+          {t.hero.subtitle}
         </p>
 
         {/* CTAs */}
@@ -60,7 +61,7 @@ export function HeroSection() {
               variant="primary" 
               size="lg"
             >
-              Get Started
+              {t.hero.ctaPrimary}
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
@@ -72,7 +73,7 @@ export function HeroSection() {
             }}
           >
             <PlayCircle className="w-5 h-5" />
-            How it works
+            {t.hero.ctaSecondary}
           </Button>
         </div>
       </motion.div>
