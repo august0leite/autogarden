@@ -2,41 +2,47 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CultivationResponseDto {
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @ApiProperty()
-  name: string;
+  name!: string;
 
   @ApiProperty({ required: false })
   plantType?: string;
 
-  @ApiProperty()
-  soilMoistureMin: number;
+  @ApiProperty({ required: false, type: [String], format: "uuid" })
+  strainIds?: string[];
 
   @ApiProperty()
-  soilMoistureMax: number;
+  startDate!: Date;
 
   @ApiProperty()
-  temperatureMin: number;
+  soilMoistureMin!: number;
 
   @ApiProperty()
-  temperatureMax: number;
+  soilMoistureMax!: number;
 
   @ApiProperty()
-  lightMin: number;
+  temperatureMin!: number;
 
   @ApiProperty()
-  lightMax: number;
+  temperatureMax!: number;
 
   @ApiProperty()
-  cooldownMinutes: number;
+  lightMin!: number;
 
   @ApiProperty()
-  userId: string;
+  lightMax!: number;
 
   @ApiProperty()
-  createdAt: Date;
+  cooldownMinutes!: number;
 
   @ApiProperty()
-  updatedAt: Date;
+  userId!: string;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
 }

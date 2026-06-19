@@ -220,10 +220,13 @@ describe("DevicesService", () => {
 
       const result = await service.findOne("device-123", "user-123");
 
-      const { userId: _userId, ...cultivationWithoutUserId } = mockCultivation;
       expect(result).toEqual({
         ...deviceWithCultivation,
-        cultivation: cultivationWithoutUserId,
+        cultivation: {
+          id: mockCultivation.id,
+          name: mockCultivation.name,
+          plantType: mockCultivation.plantType,
+        },
       });
     });
 

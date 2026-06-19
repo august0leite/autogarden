@@ -1,5 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsNumber, Min, Max, IsString } from "class-validator";
+import {
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+  IsString,
+  IsDateString,
+  IsArray,
+  ArrayUnique,
+  IsUUID,
+} from "class-validator";
 
 export class UpdateCultivationDto {
   @ApiProperty({ required: false })
@@ -11,6 +21,18 @@ export class UpdateCultivationDto {
   @IsOptional()
   @IsString()
   plantType?: string;
+
+  @ApiProperty({ required: false, type: [String], format: "uuid" })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsUUID("4", { each: true })
+  strainIds?: string[];
+
+  @ApiProperty({ required: false, type: String, format: "date-time" })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

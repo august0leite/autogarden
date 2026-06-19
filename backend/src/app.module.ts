@@ -11,6 +11,7 @@ import { CultivationsModule } from "./cultivations/cultivations.module";
 import { DevicesModule } from "./devices/devices.module";
 import { ReadingsModule } from "./readings/readings.module";
 import { ActionsModule } from "./actions/actions.module";
+import { StrainsModule } from "./strains/strains.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ActionsModule } from "./actions/actions.module";
     DevicesModule,
     ReadingsModule,
     ActionsModule,
+    StrainsModule,
   ],
   providers: [
     {

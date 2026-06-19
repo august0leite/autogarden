@@ -20,14 +20,7 @@ class EnvironmentVariables {
   @IsString()
   JWT_SECRET: string;
 
-  @IsString()
-  ALCHEMY_API_KEY: string;
 
-  @IsString()
-  CONTRACT_ADDRESS: string;
-
-  @IsString()
-  CHAIN_ID: string; // ex: "11155111" para Sepolia, "1" para mainnet
 }
 
 export function validate(config: Record<string, unknown>) {

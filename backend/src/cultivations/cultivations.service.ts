@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { CreateCultivationDto, UpdateCultivationDto } from "./dto";
@@ -11,16 +12,34 @@ export class CultivationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, createDto: CreateCultivationDto) {
-    return this.prisma.cultivation.create({
-      data: {
-        ...createDto,
-        userId,
-      },
+    const { strainIds, ...cultivationData } = createDto;
+    const uniqueStrainIds = this.uniqueIds(strainIds);
+
+    return this.prisma.$transaction(async (tx) => {
+      await this.ensureStrainsExist(uniqueStrainIds);
+
+      const cultivation = await tx.cultivation.create({
+        data: {
+          ...cultivationData,
+          userId,
+        },
+      });
+
+      if (uniqueStrainIds.length > 0) {
+        await tx.cultivationStrain.createMany({
+          data: uniqueStrainIds.map((strainId) => ({
+            cultivationId: cultivation.id,
+            strainId,
+          })),
+        });
+      }
+
+      return this.findOne(cultivation.id, userId);
     });
   }
 
   async findAllByUser(userId: string) {
-    return this.prisma.cultivation.findMany({
+    const cultivations = await this.prisma.cultivation.findMany({
       where: { userId },
       include: {
         device: {
@@ -30,8 +49,21 @@ export class CultivationsService {
             status: true,
           },
         },
+        strains: {
+          select: {
+            strainId: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
+    });
+
+    return cultivations.map((cultivation) => {
+      const { strains = [], ...rest } = cultivation;
+      return {
+        ...rest,
+        strainIds: strains.map((item) => item.strainId),
+      };
     });
   }
 
@@ -52,6 +84,11 @@ export class CultivationsService {
             updatedAt: true,
           },
         },
+        strains: {
+          select: {
+            strainId: true,
+          },
+        },
       },
     });
 
@@ -63,16 +100,44 @@ export class CultivationsService {
       throw new ForbiddenException("NOT_OWNER");
     }
 
-    return cultivation;
+    const { strains = [], ...rest } = cultivation;
+    return {
+      ...rest,
+      strainIds: strains.map((item) => item.strainId),
+    };
   }
 
   async update(id: string, userId: string, updateDto: UpdateCultivationDto) {
     // Verifica se usuário é dono
     await this.findOne(id, userId);
 
-    return this.prisma.cultivation.update({
-      where: { id },
-      data: updateDto,
+    const { strainIds, ...cultivationData } = updateDto;
+    const uniqueStrainIds = this.uniqueIds(strainIds);
+
+    return this.prisma.$transaction(async (tx) => {
+      if (strainIds !== undefined) {
+        await this.ensureStrainsExist(uniqueStrainIds);
+
+        await tx.cultivationStrain.deleteMany({
+          where: { cultivationId: id },
+        });
+
+        if (uniqueStrainIds.length > 0) {
+          await tx.cultivationStrain.createMany({
+            data: uniqueStrainIds.map((strainId) => ({
+              cultivationId: id,
+              strainId,
+            })),
+          });
+        }
+      }
+
+      await tx.cultivation.update({
+        where: { id },
+        data: cultivationData,
+      });
+
+      return this.findOne(id, userId);
     });
   }
 
@@ -90,5 +155,23 @@ export class CultivationsService {
     return this.prisma.cultivation.findUnique({
       where: { id: cultivationId },
     });
+  }
+
+  private uniqueIds(ids?: string[]) {
+    return Array.from(new Set(ids ?? []));
+  }
+
+  private async ensureStrainsExist(strainIds: string[]) {
+    if (strainIds.length === 0) {
+      return;
+    }
+
+    const existingCount = await this.prisma.strain.count({
+      where: { id: { in: strainIds } },
+    });
+
+    if (existingCount !== strainIds.length) {
+      throw new BadRequestException("INVALID_STRAIN_IDS");
+    }
   }
 }

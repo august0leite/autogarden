@@ -1,0 +1,8 @@
+export enum CultivationPhaseDto {
+  GERMINATION = "GERMINATION",
+  SEEDLING = "SEEDLING",
+  VEGETATIVE = "VEGETATIVE",
+  FLOWERING = "FLOWERING",
+  FLUSH = "FLUSH",
+  HARVEST = "HARVEST",
+}

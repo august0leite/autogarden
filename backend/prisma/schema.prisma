@@ -9,46 +9,46 @@ datasource db {
 
 // Representa quem está usando a plataforma
 model User {
-  id            String    @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Autenticação (email + senha)
-  email         String    @unique
+  email         String  @unique
   passwordHash  String
   name          String?
-  walletAddress String?   @unique
-  
-  createdAt     DateTime  @default(now())
-  lastLoginAt   DateTime?
-  
+  walletAddress String? @unique
+
+  createdAt   DateTime  @default(now())
+  lastLoginAt DateTime?
+
   // Relação com cultivos
-  cultivations  Cultivation[]
+  cultivations Cultivation[]
 
   @@map("users")
 }
 
 // Dispositivo físico (Arduino) associado a um cultivo
 model Device {
-  id            String      @id @default(uuid())
-  token         String      @unique // Token de autenticação do dispositivo
-  name          String
-  model         String?
-  description   String?
-  status        DeviceStatus @default(OFFLINE)
-  lastPingAt    DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
+  id          String       @id @default(uuid())
+  token       String       @unique // Token de autenticação do dispositivo
+  name        String
+  model       String?
+  description String?
+  status      DeviceStatus @default(OFFLINE)
+  lastPingAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
   // Relação com cultivo
   cultivationId String      @unique
   cultivation   Cultivation @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
-  
-  // Históricos
-  readings      Reading[]
-  actions       Action[]
-  decisions     Decision[]
 
-  @@map("devices")
+  // Históricos
+  readings  Reading[]
+  actions   Action[]
+  decisions Decision[]
+
   @@index([status])
+  @@map("devices")
 }
 
 enum DeviceStatus {
@@ -57,105 +57,240 @@ enum DeviceStatus {
   ERROR
 }
 
+// Strain - variedade de planta com características de cultivo
+model Strain {
+  id             String           @id @default(uuid())
+  name           String           @unique
+  imageUrl       String?
+  type           StrainType
+  thcPercentage  Float
+  difficulty     StrainDifficulty
+  vegetativeDays Int
+  floweringDays  Int
+  description    String?
+
+  cultivations CultivationStrain[]
+
+  @@map("strains")
+}
+
+enum StrainDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum StrainType {
+  INDICA
+  SATIVA
+  HYBRID
+  AUTO
+}
+
 // Cultivo - configuração de parâmetros de crescimento
 model Cultivation {
-  id                  String    @id @default(uuid())
-  name                String
-  plantType           String?
-  
-  // Parâmetros configuráveis
-  soilMoistureMin     Float     @default(40)
-  soilMoistureMax     Float     @default(70)
-  temperatureMin      Float     @default(15)
-  temperatureMax      Float     @default(35)
-  lightMin            Float     @default(30)
-  lightMax            Float     @default(100)
-  cooldownMinutes     Int       @default(30) // Tempo mínimo entre irrigações
-  
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  // Relação com usuário
-  userId              String
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Relação com dispositivo (1:1)
-  device              Device?
+  id        String   @id @default(uuid())
+  name      String
+  plantType String?
+  startDate DateTime @default(now())
 
-  @@map("cultivations")
+  // Parâmetros configuráveis
+  soilMoistureMin Float @default(40)
+  soilMoistureMax Float @default(70)
+  temperatureMin  Float @default(15)
+  temperatureMax  Float @default(35)
+  lightMin        Float @default(30)
+  lightMax        Float @default(100)
+  cooldownMinutes Int   @default(30) // Tempo mínimo entre irrigações
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relação com usuário
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relação com strains (N:N)
+  strains CultivationStrain[]
+
+  // Relação com dispositivo (1:1)
+  device Device?
+
+  // Logs de cultivo
+  growLogs GrowLog[]
+
+  // Snapshot manual de ambiente
+  environmentLogs EnvironmentLog[]
+
+  // Eventos futuros planejados
+  scheduledEvents ScheduledEvent[]
+
   @@index([userId])
+  @@map("cultivations")
+}
+
+model CultivationStrain {
+  id                 String           @unique @default(uuid())
+  cultivationId      String
+  strainId           String
+  phase              CultivationPhase @default(GERMINATION)
+  startDate          DateTime         @default(now())
+  floweringStartDate DateTime?
+  harvestDate        DateTime?
+  quantity           Int              @default(1)
+  customName         String?
+  cultivation        Cultivation      @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  strain             Strain           @relation(fields: [strainId], references: [id], onDelete: Cascade)
+  growLogs           GrowLog[]
+
+  @@id([cultivationId, strainId])
+  @@index([strainId])
+  @@map("cultivation_strains")
+}
+
+enum CultivationPhase {
+  GERMINATION
+  SEEDLING
+  VEGETATIVE
+  FLOWERING
+  FLUSH
+  HARVEST
+}
+
+model GrowLog {
+  id                  String             @id @default(uuid())
+  cultivationId       String
+  cultivationStrainId String?
+  cultivation         Cultivation        @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  cultivationStrain   CultivationStrain? @relation(fields: [cultivationStrainId], references: [id], onDelete: SetNull)
+  type                GrowLogType
+  note                String?
+  createdAt           DateTime           @default(now())
+  photoUrl            String?
+  metadata            Json?
+
+  @@index([cultivationId, createdAt])
+  @@map("grow_logs")
+}
+
+enum GrowLogType {
+  WATERING
+  FERTILIZATION
+  TRANSPLANT
+  PRUNING
+  NOTE
+  PHOTO
+}
+
+model EnvironmentLog {
+  id            String      @id @default(uuid())
+  cultivationId String
+  cultivation   Cultivation @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  soilMoisture  Float?
+  temperature   Float?
+  humidity      Float?
+  vpd           Float?
+  ph            Float?
+  ec            Float?
+  createdAt     DateTime    @default(now())
+
+  @@index([cultivationId, createdAt])
+  @@map("environment_logs")
+}
+
+model ScheduledEvent {
+  id            String            @id @default(uuid())
+  cultivationId String
+  cultivation   Cultivation        @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  type          ScheduledEventType
+  scheduledAt   DateTime
+  note          String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([cultivationId, scheduledAt])
+  @@index([type, scheduledAt])
+  @@map("scheduled_events")
+}
+
+enum ScheduledEventType {
+  WATERING
+  FERTILIZATION
+  FLOWERING_START
+  FLUSH
+  HARVEST
 }
 
 // Leitura dos sensores do dispositivo
 model Reading {
-  id            String    @id @default(uuid())
-  soilMoisture  Float
-  temperature   Float
-  light         Float
-  timestamp     DateTime  @default(now())
-  
-  // Relação com dispositivo
-  deviceId      String
-  device        Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  
-  // Decisão tomada a partir desta leitura
-  decision      Decision?
+  id           String   @id @default(uuid())
+  soilMoisture Float
+  temperature  Float
+  light        Float
+  timestamp    DateTime @default(now())
 
-  @@map("readings")
+  // Relação com dispositivo
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  // Decisão tomada a partir desta leitura
+  decision Decision?
+
   @@index([deviceId, timestamp])
+  @@map("readings")
 }
 
 // Decisão tomada pelo motor automático
 model Decision {
-  id            String         @id @default(uuid())
-  decision      DecisionType
-  reason        String
-  timestamp     DateTime       @default(now())
-  
-  // Leitura que originou a decisão
-  readingId     String         @unique
-  reading       Reading        @relation(fields: [readingId], references: [id], onDelete: Cascade)
-  
-  // Dispositivo
-  deviceId      String
-  device        Device         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  
-  // Ação gerada (se aplicável)
-  action        Action?
+  id        String       @id @default(uuid())
+  decision  DecisionType
+  reason    String
+  timestamp DateTime     @default(now())
 
-  @@map("decisions")
+  // Leitura que originou a decisão
+  readingId String  @unique
+  reading   Reading @relation(fields: [readingId], references: [id], onDelete: Cascade)
+
+  // Dispositivo
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  // Ação gerada (se aplicável)
+  action Action?
+
   @@index([deviceId, timestamp])
+  @@map("decisions")
 }
 
 enum DecisionType {
-  NO_ACTION        // Tudo dentro dos parâmetros
-  IRRIGATE         // Necessita irrigação
-  ALERT_TEMP_HIGH  // Temperatura alta
-  ALERT_TEMP_LOW   // Temperatura baixa
-  ALERT_LIGHT_LOW  // Luz baixa
+  NO_ACTION // Tudo dentro dos parâmetros
+  IRRIGATE // Necessita irrigação
+  ALERT_TEMP_HIGH // Temperatura alta
+  ALERT_TEMP_LOW // Temperatura baixa
+  ALERT_LIGHT_LOW // Luz baixa
 }
 
 // Ação executada (manual ou automática)
 model Action {
   id              String       @id @default(uuid())
   type            ActionType
-  durationSeconds Int?         // Duração da ação (ex: tempo de irrigação)
+  durationSeconds Int? // Duração da ação (ex: tempo de irrigação)
   origin          ActionOrigin @default(AUTO)
   status          ActionStatus @default(PENDING)
   timestamp       DateTime     @default(now())
   executedAt      DateTime?
-  
-  // Dispositivo
-  deviceId        String
-  device          Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  
-  // Decisão que originou (se automática)
-  decisionId      String?      @unique
-  decision        Decision?    @relation(fields: [decisionId], references: [id], onDelete: SetNull)
 
-  @@map("actions")
+  // Dispositivo
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  // Decisão que originou (se automática)
+  decisionId String?   @unique
+  decision   Decision? @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+
   @@index([deviceId, timestamp])
   @@index([status])
+  @@map("actions")
 }
 
 enum ActionType {
