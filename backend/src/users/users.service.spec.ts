@@ -16,7 +16,6 @@ describe("UsersService", () => {
     email: "test@example.com",
     passwordHash: "hashedpassword",
     name: "Test User",
-    walletAddress: null,
     createdAt: new Date(),
     lastLoginAt: new Date(),
   };
@@ -163,47 +162,6 @@ describe("UsersService", () => {
         data: { lastLoginAt: expect.any(Date) },
       });
       expect(result).toEqual(updatedUser);
-    });
-  });
-
-  describe("linkWallet", () => {
-    it("should successfully link wallet to user", async () => {
-      const walletAddress = "0x1234567890abcdef";
-      const updatedUser = { ...mockUser, walletAddress };
-
-      prismaService.user.findUnique.mockResolvedValue(null);
-      prismaService.user.update.mockResolvedValue(updatedUser);
-
-      const result = await service.linkWallet("123", walletAddress);
-
-      expect(prismaService.user.update).toHaveBeenCalledWith({
-        where: { id: "123" },
-        data: { walletAddress },
-      });
-      expect(result.walletAddress).toBe(walletAddress);
-    });
-
-    it("should throw ConflictException if wallet is already linked to another user", async () => {
-      const walletAddress = "0x1234567890abcdef";
-      const otherUser = { ...mockUser, id: "456", walletAddress };
-
-      prismaService.user.findUnique.mockResolvedValue(otherUser);
-
-      await expect(service.linkWallet("123", walletAddress)).rejects.toThrow(
-        ConflictException,
-      );
-    });
-
-    it("should allow linking same wallet to same user (idempotent)", async () => {
-      const walletAddress = "0x1234567890abcdef";
-      const userWithWallet = { ...mockUser, walletAddress };
-
-      prismaService.user.findUnique.mockResolvedValue(userWithWallet);
-      prismaService.user.update.mockResolvedValue(userWithWallet);
-
-      const result = await service.linkWallet("123", walletAddress);
-
-      expect(result.walletAddress).toBe(walletAddress);
     });
   });
 });

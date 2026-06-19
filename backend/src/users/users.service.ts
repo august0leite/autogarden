@@ -72,26 +72,4 @@ export class UsersService {
       data: { lastLoginAt: new Date() },
     });
   }
-
-  async findByWalletAddress(walletAddress: string) {
-    return this.prisma.user.findUnique({ where: { walletAddress } });
-  }
-
-  /**
-   * Vincula uma wallet a um usuário existente
-   * Permite que um usuário Web2 conecte sua wallet
-   */
-  async linkWallet(userId: string, walletAddress: string) {
-    // Verificar se a wallet já está vinculada a outro usuário
-    const existingWallet = await this.findByWalletAddress(walletAddress);
-
-    if (existingWallet && existingWallet.id !== userId) {
-      throw new ConflictException("WALLET_ALREADY_LINKED");
-    }
-
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { walletAddress },
-    });
-  }
 }

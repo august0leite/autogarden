@@ -15,7 +15,6 @@ model User {
   email         String  @unique
   passwordHash  String
   name          String?
-  walletAddress String? @unique
 
   createdAt   DateTime  @default(now())
   lastLoginAt DateTime?
