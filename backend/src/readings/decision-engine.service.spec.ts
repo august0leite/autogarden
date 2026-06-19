@@ -10,7 +10,6 @@ describe("DecisionEngineService", () => {
     id: "cult-123",
     userId: "user-123",
     name: "Tomato Garden",
-    plantType: "Tomato",
     soilMoistureMin: 40,
     soilMoistureMax: 70,
     temperatureMin: 18,
