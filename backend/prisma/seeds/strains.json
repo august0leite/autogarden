@@ -1,0 +1,192 @@
+[
+    {
+        "id": "3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a",
+        "name": "Gelato",
+        "type": "hybrid",
+        "thc_percentage": 21,
+        "difficulty": "medium",
+        "vegetative_days": 42,
+        "flowering_days": 70,
+        "description": "Gelato, also known as Larry Bird and Gelato #42 is an evenly-balanced hybrid marijuana strain made from a crossing of Sunset Sherbet and Thin Mint Girl Scout Cookies."
+    },
+    {
+        "id": "4e2a65f9-3f5b-4e6f-8a13-2d9070f1c8ad",
+        "name": "Sour Diesel",
+        "type": "hybrid",
+        "thc_percentage": 19,
+        "difficulty": "medium",
+        "vegetative_days": 56,
+        "flowering_days": 77,
+        "description": "Sour Diesel is a popular hybrid marijuana strain made by crossing Chemdawg and Super Skunk. Sour Diesel effects are dreamy, cerebral, fast-acting and energizing. This strain features a pungent flavor profile that smells like diesel."
+    },
+    {
+        "id": "9b75e2a1-a6e2-4a3f-93f3-7d5ce2ad8f14",
+        "name": "Blue Dream",
+        "type": "hybrid",
+        "thc_percentage": 21,
+        "difficulty": "easy",
+        "vegetative_days": 56,
+        "flowering_days": 70,
+        "description": "Blue Dream is a sativa-dominant hybrid marijuana strain made by crossing Blueberry with Haze. This strain produces a balanced high, along with effects such as cerebral stimulation and full-body relaxation."
+    },
+    {
+        "id": "0cf4ac8b-5d2a-4d8e-9f3b-b9d9f8c4a7de",
+        "name": "OG Kush",
+        "type": "hybrid",
+        "thc_percentage": 25,
+        "difficulty": "medium",
+        "vegetative_days": 56,
+        "flowering_days": 70,
+        "description": "OG Kush is a hybrid with a unique terpene profile that boasts a complex aroma with notes of fuel, skunk, and spice. "
+    },
+    {
+        "id": "a2f9d6c1-8b34-4f2d-8d71-4ce7f9ad20b3",
+        "name": "Girl Scout Cookies",
+        "type": "hybrid",
+        "thc_percentage": 25,
+        "difficulty": "medium",
+        "vegetative_days": 56,
+        "flowering_days": 70,
+        "description": "Girl Scout Cookiesis an indica-dominant hybrid marijuana strain from the California breeder Jigga who crossed a sub-type of OG Kush with an intermediate strain called F1 Durban. This popular strain is known for producing euphoric effects, followed up by waves of full-body relaxation"
+    },
+    {
+        "id": "d7a45b63-9f0c-4b4a-a4d2-5a32f1d8ce9f",
+        "name": "Green Crack",
+        "type": "sativa",
+        "thc_percentage": 17,
+        "difficulty": "easy",
+        "vegetative_days": 63,
+        "flowering_days": 70,
+        "description": "Green Crack, also known as Green Crush and Mango Crack, is a potent sativa marijuana strain made by crossing Skunk #1 with an unknown indica. This strain is beloved by many consumers for its energizing effects."
+    },
+    {
+        "id": "6b0e1f9d-2c7a-4fbe-9d6f-8f3a4c0e2b71",
+        "name": "Granddaddy Purple",
+        "type": "indica",
+        "thc_percentage": 17,
+        "difficulty": "easy",
+        "vegetative_days": 63,
+        "flowering_days": 70,
+        "description": "Grandaddy Purple is a California staple inherits a complex grape and berry aroma from its Purps and Ghani heritage. GDP flowers bloom in shades of deep purple, a contrasting backdrop for its snow-like dusting of white crystal resin."
+    },
+    {
+        "id": "1d3c8a7b-6f0e-4a96-b4d1-0f6a2b3c9d8e",
+        "name": "Pineapple Express",
+        "type": "hybrid",
+        "thc_percentage": 20,
+        "difficulty": "easy",
+        "vegetative_days": 56,
+        "flowering_days": 63,
+        "description": "Pineapple Express is a sativa-dominant hybrid marijuana strain made by crossing Trainwreck with Hawaiian. Pineapple Express is 20% THC and may make you feel buzzy, alert, and creative."
+    },
+    {
+        "id": "f8b2c6d9-1a4e-4d7b-8c3f-2e7a9b5d0c14",
+        "name": "White Widow",
+        "type": "hybrid",
+        "thc_percentage": 15,
+        "difficulty": "medium",
+        "vegetative_days": 56,
+        "flowering_days": 70,
+        "description": "White Widow is a balanced hybrid marijuana strain made by crossing a Brazilian sativa landrace with a resin-heavy South Indian indica. Its buds are white with crystal resin, warning you of the potent effects to come."
+    },
+    {
+        "id": "2a6d9f41-c8b3-4e2a-9f1d-6b7c0e3a5d9f",
+        "name": "GG4",
+        "type": "hybrid",
+        "thc_percentage": 20,
+        "difficulty": "easy",
+        "vegetative_days": 56,
+        "flowering_days": 70,
+        "description": "Original Glue is a hybrid weed strain made from a genetic cross between Chem’s Sister, Sour Dubb, and Chocolate Diesel. This strain is 37% sativa and 63% indica. Also known as GG4, Original Glue is a potent strain that delivers heavy-handed euphoria and relaxation, leaving you feeling “glued” to the couch."
+    },
+    {
+        "id": "7c1e4b9a-2d6f-4f3a-a9b7-1e0d8c5f2a63",
+        "name": "Jack Herer",
+        "type": "sativa",
+        "thc_percentage": 18,
+        "difficulty": "medium",
+        "vegetative_days": 42,
+        "flowering_days": 70,
+        "description": "Jack Herer’s effects include feeling energetic, creative, and uplifted. However, consumers typically describe this 55% sativa hybrid as blissful, clear-headed, and creative."
+    },
+    {
+        "id": "5d9a2e7c-b1f4-4c8d-8e6a-3f0b7d1a9c42",
+        "name": "Northern Lights",
+        "type": "indica",
+        "thc_percentage": 18,
+        "difficulty": "easy",
+        "vegetative_days": 42,
+        "flowering_days": 63,
+        "description": "Northern Lights, also known as NL, is an indica marijuana strain made by crossing Afghani with Thai. Northern Lights produces euphoric effects that settle in firmly throughout the body, relaxing muscles and easing the mind."
+    },
+    {
+        "id": "8a3f1d6e-9b2c-4e7a-b5d4-0c1f9a2e7b36",
+        "name": "Durban Poison",
+        "type": "sativa",
+        "thc_percentage": 19,
+        "difficulty": "easy",
+        "vegetative_days": 28,
+        "flowering_days": 63,
+        "description": "This pure sativa originates from the South African port city of Durban. It has gained popularity worldwide for its sweet smell and energetic, uplifting effects."
+    },
+    {
+        "id": "c4e7a1b9-3d8f-4a2c-9b6e-2f0d5a7c1e84",
+        "name": "Bubba Kush",
+        "type": "indica",
+        "thc_percentage": 17,
+        "difficulty": "easy",
+        "vegetative_days": 56,
+        "flowering_days": 63,
+        "description": "Bubba Kush, also known as BK, Bubba, and Bubba OG Kush is an indica marijuana strain from Florida that has gained notoriety in the US and beyond for its heavy tranquilizing effects."
+    },
+    {
+        "id": "e1b6d3a8-7c2f-4f9a-8d5b-4a0e2c7f1d93",
+        "name": "Trainwreck",
+        "type": "hybrid",
+        "thc_percentage": 17,
+        "difficulty": "easy",
+        "vegetative_days": 28,
+        "flowering_days": 70,
+        "description": "Trainwreck is a mind-bending, potent sativa with effects that hit like a freight train. Mexican and Thai sativas were bred with Afghani indicas to produce this Northern California staple, passing on a sweet lemon and spicy pine aroma"
+    },
+    {
+        "id": "b9d2f7c1-5a3e-4d8b-9f6c-7e1a0d2c4b85",
+        "name": "AK-47",
+        "type": "hybrid",
+        "thc_percentage": 19,
+        "difficulty": "easy",
+        "vegetative_days": 56,
+        "flowering_days": 63,
+        "description": "AK-47, also known as AK, is a sativa-dominant hybrid marijuana strain that mixes Colombian, Mexican, Thai, and Afghani varieties. Don't let its intense name fool you: AK-47 will leave you relaxed and mellowe."
+    },
+    {
+        "id": "3a8c1e5d-6f2b-4a7d-b9e3-1d0f6c2a7b94",
+        "name": "Strawberry Cough",
+        "type": "sativa",
+        "thc_percentage": 19,
+        "difficulty": "easy",
+        "vegetative_days": 42,
+        "flowering_days": 70,
+        "description": "Strawberry Cough is known for its sweet smell of fresh strawberries and an expanding sensation that can make even the most seasoned consumer cough, Strawberry Cough is a potent sativa marijuana strain with mysterious genetic origins."
+    },
+    {
+        "id": "6e2b9d4a-1c7f-4f3d-8a5b-9c0e2a1d7f63",
+        "name": "Blue Cheese",
+        "type": "indica",
+        "thc_percentage": 18,
+        "difficulty": "easy",
+        "vegetative_days": 28,
+        "flowering_days": 70,
+        "description": "Blue Cheese is an indica cross created by crossing a Blueberry male with an original U.K. Cheese (a Skunk #1 phenotype) female. The sweet and savory smells of berry and blue cheese combine to create a creamy, unique flavor reminiscent of the original Cheese."
+    },
+    {
+        "id": "0b7d3f9a-4e1c-4a6f-b2d8-5f9a1c3e7d26",
+        "name": "Wedding Cake",
+        "type": "hybrid",
+        "thc_percentage": 24,
+        "difficulty": "medium",
+        "vegetative_days": 56,
+        "flowering_days": 63,
+        "description": "Wedding Cake is a potent type of indica-hybrid marijuana strain made by crossing Triangle Kush with Animal Mints. The Wedding Cake strain provides relaxing and euphoric effects that calm the body and mind. This strain yields a rich and tangy flavor profile with undertones of earthy pepper"
+    }
+]

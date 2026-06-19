@@ -68,7 +68,6 @@ export class DevicesService {
           select: {
             id: true,
             name: true,
-            plantType: true,
           },
         },
       },
@@ -93,7 +92,6 @@ export class DevicesService {
           select: {
             id: true,
             name: true,
-            plantType: true,
             userId: true,
           },
         },
@@ -112,7 +110,6 @@ export class DevicesService {
     const safeCultivation = {
       id: cultivation.id,
       name: cultivation.name,
-      plantType: cultivation.plantType,
     };
 
     return {

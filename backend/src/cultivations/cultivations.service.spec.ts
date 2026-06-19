@@ -1,5 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { NotFoundException, ForbiddenException } from "@nestjs/common";
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from "@nestjs/common";
 import { CultivationsService } from "./cultivations.service";
 import { PrismaService } from "../database/prisma.service";
 import { CreateCultivationDto, UpdateCultivationDto } from "./dto";
@@ -12,7 +16,6 @@ describe("CultivationsService", () => {
     id: "cult-123",
     userId: "user-123",
     name: "Tomato Garden",
-    plantType: "Tomato",
     soilMoistureMin: 40,
     soilMoistureMax: 70,
     temperatureMin: 18,
@@ -25,6 +28,7 @@ describe("CultivationsService", () => {
 
   beforeEach(async () => {
     const mockPrismaService = {
+      $transaction: jest.fn(),
       cultivation: {
         create: jest.fn(),
         findMany: jest.fn(),
@@ -32,7 +36,18 @@ describe("CultivationsService", () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      grow: {
+        createMany: jest.fn(),
+        deleteMany: jest.fn(),
+      },
+      strain: {
+        count: jest.fn(),
+      },
     };
+
+    mockPrismaService.$transaction.mockImplementation(async (callback: any) =>
+      callback(mockPrismaService),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -57,7 +72,7 @@ describe("CultivationsService", () => {
       const userId = "user-123";
       const createDto: CreateCultivationDto = {
         name: "Tomato Garden",
-        plantType: "Tomato",
+        strainIds: ["3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a"],
         soilMoistureMin: 40,
         soilMoistureMax: 70,
         temperatureMin: 18,
@@ -66,17 +81,51 @@ describe("CultivationsService", () => {
         cooldownMinutes: 30,
       };
 
-      prismaService.cultivation.create.mockResolvedValue(mockCultivation);
+      prismaService.strain.count.mockResolvedValue(1);
+      prismaService.cultivation.create.mockResolvedValue(mockCultivation as any);
+      prismaService.cultivation.findUnique.mockResolvedValue(mockCultivation as any);
 
       const result = await service.create(userId, createDto);
 
+      expect(prismaService.strain.count).toHaveBeenCalledWith({
+        where: { id: { in: ["3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a"] } },
+      });
       expect(prismaService.cultivation.create).toHaveBeenCalledWith({
         data: {
-          ...createDto,
+          name: "Tomato Garden",
+          soilMoistureMin: 40,
+          soilMoistureMax: 70,
+          temperatureMin: 18,
+          temperatureMax: 30,
+          lightMin: 60,
+          cooldownMinutes: 30,
           userId,
         },
       });
-      expect(result).toEqual(mockCultivation);
+      expect(prismaService.grow.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            cultivationId: "cult-123",
+            strainId: "3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a",
+            startDate: mockCultivation.createdAt,
+          },
+        ],
+      });
+      expect(result).toEqual({
+        ...mockCultivation,
+        strainIds: [],
+      });
+    });
+
+    it("should throw when one or more strain ids are invalid", async () => {
+      prismaService.strain.count.mockResolvedValue(0);
+
+      await expect(
+        service.create("user-123", {
+          name: "Tomato Garden",
+          strainIds: ["3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a"],
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -86,6 +135,7 @@ describe("CultivationsService", () => {
       const cultivations = [
         {
           ...mockCultivation,
+          grows: [{ strainId: "s-1" }, { strainId: "s-2" }],
           device: {
             id: "device-1",
             name: "Arduino 1",
@@ -108,10 +158,25 @@ describe("CultivationsService", () => {
               status: true,
             },
           },
+          grows: {
+            select: {
+              strainId: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
       });
-      expect(result).toEqual(cultivations);
+      expect(result).toEqual([
+        {
+          ...mockCultivation,
+          device: {
+            id: "device-1",
+            name: "Arduino 1",
+            status: "ONLINE",
+          },
+          strainIds: ["s-1", "s-2"],
+        },
+      ]);
     });
 
     it("should return empty array when user has no cultivations", async () => {
@@ -127,6 +192,7 @@ describe("CultivationsService", () => {
     it("should return cultivation when found and user is owner", async () => {
       const cultivationWithDevice = {
         ...mockCultivation,
+        grows: [{ strainId: "s-1" }],
         device: null,
       };
 
@@ -152,9 +218,18 @@ describe("CultivationsService", () => {
               updatedAt: true,
             },
           },
+          grows: {
+            select: {
+              strainId: true,
+            },
+          },
         },
       });
-      expect(result).toEqual(cultivationWithDevice);
+      expect(result).toEqual({
+        ...mockCultivation,
+        device: null,
+        strainIds: ["s-1"],
+      });
     });
 
     it("should throw NotFoundException when cultivation not found", async () => {
@@ -179,20 +254,42 @@ describe("CultivationsService", () => {
       const updateDto: UpdateCultivationDto = {
         name: "Updated Tomato Garden",
         soilMoistureMin: 45,
+        strainIds: ["3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a"],
       };
 
       const updatedCultivation = { ...mockCultivation, ...updateDto };
 
-      prismaService.cultivation.findUnique.mockResolvedValue(mockCultivation);
-      prismaService.cultivation.update.mockResolvedValue(updatedCultivation);
+      prismaService.strain.count.mockResolvedValue(1);
+      prismaService.cultivation.findUnique
+        .mockResolvedValueOnce(mockCultivation as any)
+        .mockResolvedValueOnce({ ...updatedCultivation, grows: [] } as any);
+      prismaService.cultivation.update.mockResolvedValue(updatedCultivation as any);
 
       const result = await service.update("cult-123", "user-123", updateDto);
 
+      expect(prismaService.grow.deleteMany).toHaveBeenCalledWith({
+        where: { cultivationId: "cult-123" },
+      });
+      expect(prismaService.grow.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            cultivationId: "cult-123",
+            strainId: "3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a",
+            startDate: expect.any(Date),
+          },
+        ],
+      });
       expect(prismaService.cultivation.update).toHaveBeenCalledWith({
         where: { id: "cult-123" },
-        data: updateDto,
+        data: {
+          name: "Updated Tomato Garden",
+          soilMoistureMin: 45,
+        },
       });
-      expect(result).toEqual(updatedCultivation);
+      expect(result).toEqual({
+        ...updatedCultivation,
+        strainIds: [],
+      });
     });
 
     it("should throw NotFoundException when cultivation not found", async () => {

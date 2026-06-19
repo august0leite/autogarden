@@ -59,7 +59,7 @@ export class ReadingsService {
     });
 
     // Se há ação a ser tomada, criar
-    let action = null;
+    let action: Awaited<ReturnType<typeof this.actionsService.createAutoAction>> | null = null;
     if (decisionResult.action) {
       action = await this.actionsService.createAutoAction(
         deviceId,
