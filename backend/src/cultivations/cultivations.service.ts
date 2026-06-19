@@ -26,10 +26,11 @@ export class CultivationsService {
       });
 
       if (uniqueStrainIds.length > 0) {
-        await tx.cultivationStrain.createMany({
+        await tx.grow.createMany({
           data: uniqueStrainIds.map((strainId) => ({
             cultivationId: cultivation.id,
             strainId,
+            startDate: cultivation.createdAt,
           })),
         });
       }
@@ -49,7 +50,7 @@ export class CultivationsService {
             status: true,
           },
         },
-        strains: {
+        grows: {
           select: {
             strainId: true,
           },
@@ -59,10 +60,10 @@ export class CultivationsService {
     });
 
     return cultivations.map((cultivation) => {
-      const { strains = [], ...rest } = cultivation;
+      const { grows = [], ...rest } = cultivation;
       return {
         ...rest,
-        strainIds: strains.map((item) => item.strainId),
+        strainIds: grows.map((item) => item.strainId).filter(Boolean),
       };
     });
   }
@@ -84,7 +85,7 @@ export class CultivationsService {
             updatedAt: true,
           },
         },
-        strains: {
+        grows: {
           select: {
             strainId: true,
           },
@@ -100,10 +101,10 @@ export class CultivationsService {
       throw new ForbiddenException("NOT_OWNER");
     }
 
-    const { strains = [], ...rest } = cultivation;
+    const { grows = [], ...rest } = cultivation;
     return {
       ...rest,
-      strainIds: strains.map((item) => item.strainId),
+      strainIds: grows.map((item) => item.strainId).filter(Boolean),
     };
   }
 
@@ -118,15 +119,16 @@ export class CultivationsService {
       if (strainIds !== undefined) {
         await this.ensureStrainsExist(uniqueStrainIds);
 
-        await tx.cultivationStrain.deleteMany({
+        await tx.grow.deleteMany({
           where: { cultivationId: id },
         });
 
         if (uniqueStrainIds.length > 0) {
-          await tx.cultivationStrain.createMany({
+          await tx.grow.createMany({
             data: uniqueStrainIds.map((strainId) => ({
               cultivationId: id,
               strainId,
+              startDate: new Date(),
             })),
           });
         }

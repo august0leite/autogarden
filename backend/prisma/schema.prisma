@@ -68,7 +68,7 @@ model Strain {
   floweringDays  Int
   description    String?
 
-  cultivations CultivationStrain[]
+  grows Grow[]
 
   @@map("strains")
 }
@@ -90,8 +90,6 @@ enum StrainType {
 model Cultivation {
   id        String   @id @default(uuid())
   name      String
-  plantType String?
-  startDate DateTime @default(now())
 
   // Parâmetros configuráveis
   soilMoistureMin Float @default(40)
@@ -109,42 +107,35 @@ model Cultivation {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relação com strains (N:N)
-  strains CultivationStrain[]
+  // Relação com grows
+  grows Grow[]
 
   // Relação com dispositivo (1:1)
   device Device?
-
-  // Logs de cultivo
-  growLogs GrowLog[]
-
-  // Snapshot manual de ambiente
-  environmentLogs EnvironmentLog[]
-
-  // Eventos futuros planejados
-  scheduledEvents ScheduledEvent[]
 
   @@index([userId])
   @@map("cultivations")
 }
 
-model CultivationStrain {
-  id                 String           @unique @default(uuid())
+model Grow {
+  id                 String           @id @default(uuid())
   cultivationId      String
-  strainId           String
+  strainId           String?
+  customName         String?
+  quantity           Int              @default(1)
   phase              CultivationPhase @default(GERMINATION)
-  startDate          DateTime         @default(now())
+  startDate          DateTime
   floweringStartDate DateTime?
   harvestDate        DateTime?
-  quantity           Int              @default(1)
-  customName         String?
   cultivation        Cultivation      @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
-  strain             Strain           @relation(fields: [strainId], references: [id], onDelete: Cascade)
+  strain             Strain?          @relation(fields: [strainId], references: [id], onDelete: SetNull)
   growLogs           GrowLog[]
+  scheduledEvents    ScheduledEvent[]
+  environmentLogs    EnvironmentLog[]
 
-  @@id([cultivationId, strainId])
+  @@index([cultivationId])
   @@index([strainId])
-  @@map("cultivation_strains")
+  @@map("grows")
 }
 
 enum CultivationPhase {
@@ -158,17 +149,15 @@ enum CultivationPhase {
 
 model GrowLog {
   id                  String             @id @default(uuid())
-  cultivationId       String
-  cultivationStrainId String?
-  cultivation         Cultivation        @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
-  cultivationStrain   CultivationStrain? @relation(fields: [cultivationStrainId], references: [id], onDelete: SetNull)
+  growId              String
+  grow                Grow               @relation(fields: [growId], references: [id], onDelete: Cascade)
   type                GrowLogType
   note                String?
   createdAt           DateTime           @default(now())
   photoUrl            String?
   metadata            Json?
 
-  @@index([cultivationId, createdAt])
+  @@index([growId, createdAt])
   @@map("grow_logs")
 }
 
@@ -183,8 +172,8 @@ enum GrowLogType {
 
 model EnvironmentLog {
   id            String      @id @default(uuid())
-  cultivationId String
-  cultivation   Cultivation @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  growId        String
+  grow          Grow        @relation(fields: [growId], references: [id], onDelete: Cascade)
   soilMoisture  Float?
   temperature   Float?
   humidity      Float?
@@ -193,21 +182,21 @@ model EnvironmentLog {
   ec            Float?
   createdAt     DateTime    @default(now())
 
-  @@index([cultivationId, createdAt])
+  @@index([growId, createdAt])
   @@map("environment_logs")
 }
 
 model ScheduledEvent {
   id            String            @id @default(uuid())
-  cultivationId String
-  cultivation   Cultivation        @relation(fields: [cultivationId], references: [id], onDelete: Cascade)
+  growId        String
+  grow          Grow              @relation(fields: [growId], references: [id], onDelete: Cascade)
   type          ScheduledEventType
   scheduledAt   DateTime
   note          String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  @@index([cultivationId, scheduledAt])
+  @@index([growId, scheduledAt])
   @@index([type, scheduledAt])
   @@map("scheduled_events")
 }

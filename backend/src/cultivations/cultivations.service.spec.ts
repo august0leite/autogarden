@@ -16,7 +16,6 @@ describe("CultivationsService", () => {
     id: "cult-123",
     userId: "user-123",
     name: "Tomato Garden",
-    plantType: "Tomato",
     soilMoistureMin: 40,
     soilMoistureMax: 70,
     temperatureMin: 18,
@@ -37,7 +36,7 @@ describe("CultivationsService", () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
-      cultivationStrain: {
+      grow: {
         createMany: jest.fn(),
         deleteMany: jest.fn(),
       },
@@ -74,7 +73,6 @@ describe("CultivationsService", () => {
       const createDto: CreateCultivationDto = {
         name: "Tomato Garden",
         strainIds: ["3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a"],
-        plantType: "Tomato",
         soilMoistureMin: 40,
         soilMoistureMax: 70,
         temperatureMin: 18,
@@ -95,7 +93,6 @@ describe("CultivationsService", () => {
       expect(prismaService.cultivation.create).toHaveBeenCalledWith({
         data: {
           name: "Tomato Garden",
-          plantType: "Tomato",
           soilMoistureMin: 40,
           soilMoistureMax: 70,
           temperatureMin: 18,
@@ -105,11 +102,12 @@ describe("CultivationsService", () => {
           userId,
         },
       });
-      expect(prismaService.cultivationStrain.createMany).toHaveBeenCalledWith({
+      expect(prismaService.grow.createMany).toHaveBeenCalledWith({
         data: [
           {
             cultivationId: "cult-123",
             strainId: "3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a",
+            startDate: mockCultivation.createdAt,
           },
         ],
       });
@@ -137,7 +135,7 @@ describe("CultivationsService", () => {
       const cultivations = [
         {
           ...mockCultivation,
-          strains: [{ strainId: "s-1" }, { strainId: "s-2" }],
+          grows: [{ strainId: "s-1" }, { strainId: "s-2" }],
           device: {
             id: "device-1",
             name: "Arduino 1",
@@ -160,7 +158,7 @@ describe("CultivationsService", () => {
               status: true,
             },
           },
-          strains: {
+          grows: {
             select: {
               strainId: true,
             },
@@ -194,7 +192,7 @@ describe("CultivationsService", () => {
     it("should return cultivation when found and user is owner", async () => {
       const cultivationWithDevice = {
         ...mockCultivation,
-        strains: [{ strainId: "s-1" }],
+        grows: [{ strainId: "s-1" }],
         device: null,
       };
 
@@ -220,7 +218,7 @@ describe("CultivationsService", () => {
               updatedAt: true,
             },
           },
-          strains: {
+          grows: {
             select: {
               strainId: true,
             },
@@ -264,19 +262,20 @@ describe("CultivationsService", () => {
       prismaService.strain.count.mockResolvedValue(1);
       prismaService.cultivation.findUnique
         .mockResolvedValueOnce(mockCultivation as any)
-        .mockResolvedValueOnce({ ...updatedCultivation, strains: [] } as any);
+        .mockResolvedValueOnce({ ...updatedCultivation, grows: [] } as any);
       prismaService.cultivation.update.mockResolvedValue(updatedCultivation as any);
 
       const result = await service.update("cult-123", "user-123", updateDto);
 
-      expect(prismaService.cultivationStrain.deleteMany).toHaveBeenCalledWith({
+      expect(prismaService.grow.deleteMany).toHaveBeenCalledWith({
         where: { cultivationId: "cult-123" },
       });
-      expect(prismaService.cultivationStrain.createMany).toHaveBeenCalledWith({
+      expect(prismaService.grow.createMany).toHaveBeenCalledWith({
         data: [
           {
             cultivationId: "cult-123",
             strainId: "3f1fbf8a-d6f7-4d04-b9b7-1b8b3b8d0f3a",
+            startDate: expect.any(Date),
           },
         ],
       });

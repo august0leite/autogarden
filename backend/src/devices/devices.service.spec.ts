@@ -12,7 +12,6 @@ describe("DevicesService", () => {
     id: "cult-123",
     userId: "user-123",
     name: "Tomato Garden",
-    plantType: "Tomato",
     soilMoistureMin: 40,
     soilMoistureMax: 70,
     temperatureMin: 18,
@@ -168,7 +167,6 @@ describe("DevicesService", () => {
           cultivation: {
             id: "cult-123",
             name: "Tomato Garden",
-            plantType: "Tomato",
           },
         },
       ];
@@ -197,7 +195,6 @@ describe("DevicesService", () => {
             select: {
               id: true,
               name: true,
-              plantType: true,
             },
           },
         },
@@ -225,7 +222,6 @@ describe("DevicesService", () => {
         cultivation: {
           id: mockCultivation.id,
           name: mockCultivation.name,
-          plantType: mockCultivation.plantType,
         },
       });
     });

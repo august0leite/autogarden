@@ -7,14 +7,8 @@ export class CultivationResponseDto {
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({ required: false })
-  plantType?: string;
-
   @ApiProperty({ required: false, type: [String], format: "uuid" })
   strainIds?: string[];
-
-  @ApiProperty()
-  startDate!: Date;
 
   @ApiProperty()
   soilMoistureMin!: number;

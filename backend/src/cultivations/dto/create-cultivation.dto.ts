@@ -5,7 +5,6 @@ import {
   IsNumber,
   Min,
   Max,
-  IsDateString,
   IsArray,
   ArrayUnique,
   IsUUID,
@@ -16,22 +15,12 @@ export class CreateCultivationDto {
   @IsString()
   name!: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  plantType?: string;
-
   @ApiProperty({ required: false, type: [String], format: "uuid" })
   @IsOptional()
   @IsArray()
   @ArrayUnique()
   @IsUUID("4", { each: true })
   strainIds?: string[];
-
-  @ApiProperty({ required: false, type: String, format: "date-time" })
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
 
   @ApiProperty({ default: 40 })
   @IsOptional()
